@@ -3,11 +3,13 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
+  <!--parent>
     <groupId>com.magnet.mmx</groupId>
     <artifactId>mmx-root</artifactId>
     <version>1.2.3</version>
-  </parent>
+  </parent-->
+  <groupId>com.magnet.mmx</groupId>
+  <version>1.2.3</version>
 
   <packaging>jar</packaging>
   <artifactId>mmx-common-api</artifactId>
@@ -19,6 +21,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
