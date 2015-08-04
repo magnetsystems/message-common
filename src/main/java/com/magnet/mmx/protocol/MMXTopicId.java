@@ -28,12 +28,13 @@ import com.magnet.mmx.util.Utils;
  */
 public class MMXTopicId implements MMXTopic {
   private static final long serialVersionUID = -6889781636342385244L;
+  private transient int mHashCode;
   protected transient String mUserId; // null or human readable user ID.
   @SerializedName("topicName")
   protected String mTopic;
   @SerializedName("userId")
   protected String mEscUserId; // null or XEP-0106 conformed user ID.
-
+  
   /**
    * @hide
    * Constructor for a global topic.
@@ -48,13 +49,14 @@ public class MMXTopicId implements MMXTopic {
   /**
    * @hide
    * Constructor for a user topic.
-   * @param userId The user ID of the user topic.
+   * @param userId The user ID in lower case of the user topic.
    * @param topic The topic name.
    */
   public MMXTopicId(String userId, String topic) {
     if (topic == null || topic.isEmpty())
       throw new IllegalArgumentException("topic name cannot be null or empty");
     mTopic = topic;
+    mHashCode = mTopic.toLowerCase().hashCode();
     if (userId != null) {
       if (userId.indexOf('@') >= 0) {
         mUserId = userId;
@@ -117,6 +119,25 @@ public class MMXTopicId implements MMXTopic {
     if ((mUserId != null) && !mUserId.equalsIgnoreCase(topic.getUserId()))
       return false;
     return mTopic.equalsIgnoreCase(topic.getName());
+  }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MMXTopic))
+      return false;
+    MMXTopic topic = (MMXTopic) obj;
+    return equals(topic);
+  }
+  
+  /**
+   * Get the hash code based on the lower case of the topic name.
+   */
+  @Override
+  public int hashCode() {
+    if (mHashCode == 0) {
+      mHashCode = mTopic.toLowerCase().hashCode();
+    }
+    return mHashCode;
   }
   
   /**

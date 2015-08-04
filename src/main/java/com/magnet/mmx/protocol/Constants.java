@@ -73,6 +73,7 @@ public class Constants {
   public final static String MMX_APP_REG = MMX_ELEMENT;
   public final static String MMX_DEV_REG = MMX_ELEMENT;
   
+  public final static String MMX_MMXMETA = "mmxmeta";
   public final static String MMX_META = "meta";
   public final static String MMX_PAYLOAD = "payload";
   
