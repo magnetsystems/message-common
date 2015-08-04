@@ -61,6 +61,20 @@
       </plugin>
     </plugins>   	    
   </build>	  
+  
+  <distributionManagement>
+    <repository>
+      <id>libs-release-local</id>
+      <name>Releases</name>
+      <url>${env.MAVEN_RELEASES_URL}</url>
+    </repository>
+    <snapshotRepository>
+      <id>libs-snapshot-local</id>
+      <name>Snapshots</name>
+      <url>${env.MAVEN_SNAPSHOTS_URL}</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>com.google.code.gson</groupId>
