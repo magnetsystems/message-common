@@ -24,6 +24,7 @@ import java.util.Hashtable;
  */
 public class Headers extends Hashtable<String, String> {
   private static final long serialVersionUID = 5090333410521907673L;
+
   /**
    * A special header used by MMX SDK to specify whom the message should be
    * replied to.  The value is either a user ID or a full XID which can be
@@ -56,7 +57,7 @@ public class Headers extends Hashtable<String, String> {
   }
   
   /**
-   * A convenient method to set or remove a header.
+   * A convenient method to set or remove a header with String type.
    * @param key A key name.
    * @param value A value to set or null to remove the key.
    * @return
@@ -72,7 +73,7 @@ public class Headers extends Hashtable<String, String> {
   }
   
   /**
-   * Get a header value with default.
+   * Get a header String value with default.
    * @param key  A key name.
    * @param defVal A default value to be returned if the key does not exist.
    * @return A header value or the default value.
