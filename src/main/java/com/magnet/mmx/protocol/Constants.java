@@ -116,6 +116,7 @@ public class Constants {
   public final static String MMX_NS_MSG_WAKEUP = "com.magnet:msg:wakeup";
   public final static String MMX_NS_PUBSUB = "com.magnet:pubsub";
   public final static String MMX_NS_CONTEXT = "com.magnet:ctx";
+  public static final String MMX_NS_MSG_SIGNAL = "com.magnet:msg:signal";
 
   public final static String MMX_ACTION_CODE_WAKEUP = "w";
   public final static String MMX_ACTION_CODE_PUSH = "p";
