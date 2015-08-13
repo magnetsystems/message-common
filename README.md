@@ -3,7 +3,7 @@ Magnet Message Common
 
 About
 -----
-Message Common repository contains the source code that is common between [Magnet Message Android SDK](https://github.com/magnetsystems/message-sdk-java-android) and [Magnet Message Server](https://github.com/magnetsystems/message-server).
+Message Common repository contains the source code that is shared between [Magnet Message Android SDK](https://github.com/magnetsystems/message-sdk-java-android) and [Magnet Message Server](https://github.com/magnetsystems/message-server).
 
 ### Build Instructions
 ----------------------
