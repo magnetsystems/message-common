@@ -17,4 +17,4 @@ Message Common repository contains the source code that is common between [Magne
 
 The build will generate a jar file containing the common classes and install it
 to your local maven repository. Jar file will be located at
-target/mmx-common-api-<version>.jar
+target/mmx-common-api-\<version\>.jar
