@@ -1289,4 +1289,94 @@ public class TopicAction {
       return GsonData.getGson().fromJson(json, FetchResponse.class);
     }
   }
+  
+  /**
+   * @hide
+   * Request to get all subscribers from a topic.
+   */
+  public static class ListSubscriptionsRequest extends JSONifiable {
+    @SerializedName("userId")
+    private String mUserId;
+    @SerializedName("topicName")
+    private String mTopic;
+    @SerializedName("limit")
+    private int mLimit;
+    
+    /**
+     * 
+     * @param userId Null for global topic, user ID for the user topic.
+     * @param topic The topic name.
+     * @param limit -1 for unlimited, or > 0.
+     */
+    public ListSubscriptionsRequest(String userId, String topic, int limit) {
+      mUserId = userId;
+      mTopic = topic;
+      mLimit = limit;
+    }
+    
+    public String getUserId() {
+      return mUserId;
+    }
+    
+    public String getTopic() {
+      return mTopic;
+    }
+    
+    public int getLimit() {
+      return mLimit;
+    }
+  }
+  
+  /**
+   * @hide
+   * User subscription information.
+   */
+  public static class Subscription extends JSONifiable {
+    @SerializedName("subscriptionId")
+    private String mSubId;
+    @SerializedName("user")
+    private UserInfo mUser;
+    
+    public Subscription(String subId, UserInfo user) {
+      mSubId = subId;
+      mUser = user;
+    }
+    
+    public String getSubId() {
+      return mSubId;
+    }
+    
+    public UserInfo getUser() {
+      return mUser;
+    }
+  }
+  
+  /**
+   * @hide
+   * Response of getting all subscribers to a topic.
+   */
+  public static class ListSubscriptionsResponse extends MMXStatus {
+    @SerializedName("subscriptions")
+    private List<Subscription> mSubscriptions;
+    @SerializedName("totalCount")
+    private int mTotal;
+    
+    public List<Subscription> getSubscriptions() {
+      return mSubscriptions;
+    }
+    
+    public ListSubscriptionsResponse setSubscriptions(List<Subscription> subscriptions) {
+      mSubscriptions = subscriptions;
+      return this;
+    }
+    
+    public int getTotal() {
+      return mTotal;
+    }
+    
+    public ListSubscriptionsResponse setTotal(int total) {
+      mTotal = total;
+      return this;
+    }
+  }
 }

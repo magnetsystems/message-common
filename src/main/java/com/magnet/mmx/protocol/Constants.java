@@ -374,6 +374,10 @@ public class Constants {
      * Get published items by item ID's
      */
     getItems,
+    /**
+     * Get all subscribers to a topic.
+     */
+    listsubscriptions,
   }
 
   // constants used in top level push payloads
