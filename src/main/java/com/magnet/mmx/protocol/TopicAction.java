@@ -1294,7 +1294,7 @@ public class TopicAction {
    * @hide
    * Request to get all subscribers from a topic.
    */
-  public static class ListSubscriptionsRequest extends JSONifiable {
+  public static class SubscribersRequest extends JSONifiable {
     @SerializedName("userId")
     private String mUserId;
     @SerializedName("topicName")
@@ -1308,7 +1308,7 @@ public class TopicAction {
      * @param topic The topic name.
      * @param limit -1 for unlimited, or > 0.
      */
-    public ListSubscriptionsRequest(String userId, String topic, int limit) {
+    public SubscribersRequest(String userId, String topic, int limit) {
       mUserId = userId;
       mTopic = topic;
       mLimit = limit;
@@ -1325,29 +1325,9 @@ public class TopicAction {
     public int getLimit() {
       return mLimit;
     }
-  }
-  
-  /**
-   * @hide
-   * User subscription information.
-   */
-  public static class Subscription extends JSONifiable {
-    @SerializedName("subscriptionId")
-    private String mSubId;
-    @SerializedName("user")
-    private UserInfo mUser;
     
-    public Subscription(String subId, UserInfo user) {
-      mSubId = subId;
-      mUser = user;
-    }
-    
-    public String getSubId() {
-      return mSubId;
-    }
-    
-    public UserInfo getUser() {
-      return mUser;
+    public static SubscribersRequest fromJson(String json) {
+      return GsonData.getGson().fromJson(json, SubscribersRequest.class);
     }
   }
   
@@ -1355,18 +1335,18 @@ public class TopicAction {
    * @hide
    * Response of getting all subscribers to a topic.
    */
-  public static class ListSubscriptionsResponse extends MMXStatus {
-    @SerializedName("subscriptions")
-    private List<Subscription> mSubscriptions;
+  public static class SubscribersResponse extends MMXStatus {
+    @SerializedName("subscribers")
+    private List<UserInfo> mSubscribers;
     @SerializedName("totalCount")
     private int mTotal;
     
-    public List<Subscription> getSubscriptions() {
-      return mSubscriptions;
+    public List<UserInfo> getSubscribers() {
+      return mSubscribers;
     }
     
-    public ListSubscriptionsResponse setSubscriptions(List<Subscription> subscriptions) {
-      mSubscriptions = subscriptions;
+    public SubscribersResponse setSubscribers(List<UserInfo> subscribers) {
+      mSubscribers = subscribers;
       return this;
     }
     
@@ -1374,9 +1354,13 @@ public class TopicAction {
       return mTotal;
     }
     
-    public ListSubscriptionsResponse setTotal(int total) {
+    public SubscribersResponse setTotal(int total) {
       mTotal = total;
       return this;
+    }
+    
+    public static SubscribersResponse fromJson(String json) {
+      return GsonData.getGson().fromJson(json, SubscribersResponse.class);
     }
   }
 }

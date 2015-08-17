@@ -377,7 +377,7 @@ public class Constants {
     /**
      * Get all subscribers to a topic.
      */
-    listsubscriptions,
+    getSubscribers,
   }
 
   // constants used in top level push payloads
