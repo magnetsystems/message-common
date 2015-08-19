@@ -189,6 +189,7 @@ public class Constants {
     delete,
     query,
     get,
+    list,
     search,
     update,
     reset,

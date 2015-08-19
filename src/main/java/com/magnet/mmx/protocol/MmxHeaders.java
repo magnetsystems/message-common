@@ -25,8 +25,12 @@ import java.util.Hashtable;
 public class MmxHeaders extends Hashtable<String, Object> {
   private static final long serialVersionUID = 9047305151889919321L;
   /**
-   * A special header used by MMX SDK to specify all recipients of a
-   * multiple addresses message.
+   * A special header used by MMX SDK to specify the sender with display name.
+   */
+  public final static String FROM = "From";
+  /**
+   * A special header used by MMX SDK to specify the recipient(s) with display
+   * name(s).
    */
   public final static String TO = "To";
 
