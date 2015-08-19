@@ -1289,4 +1289,78 @@ public class TopicAction {
       return GsonData.getGson().fromJson(json, FetchResponse.class);
     }
   }
+  
+  /**
+   * @hide
+   * Request to get all subscribers from a topic.
+   */
+  public static class SubscribersRequest extends JSONifiable {
+    @SerializedName("userId")
+    private String mUserId;
+    @SerializedName("topicName")
+    private String mTopic;
+    @SerializedName("limit")
+    private int mLimit;
+    
+    /**
+     * 
+     * @param userId Null for global topic, user ID for the user topic.
+     * @param topic The topic name.
+     * @param limit -1 for unlimited, or > 0.
+     */
+    public SubscribersRequest(String userId, String topic, int limit) {
+      mUserId = userId;
+      mTopic = topic;
+      mLimit = limit;
+    }
+    
+    public String getUserId() {
+      return mUserId;
+    }
+    
+    public String getTopic() {
+      return mTopic;
+    }
+    
+    public int getLimit() {
+      return mLimit;
+    }
+    
+    public static SubscribersRequest fromJson(String json) {
+      return GsonData.getGson().fromJson(json, SubscribersRequest.class);
+    }
+  }
+  
+  /**
+   * @hide
+   * Response of getting all subscribers to a topic.
+   */
+  public static class SubscribersResponse extends MMXStatus {
+    @SerializedName("subscribers")
+    private List<UserInfo> mSubscribers;
+    @SerializedName("totalCount")
+    private int mTotal;
+    
+    public List<UserInfo> getSubscribers() {
+      return mSubscribers;
+    }
+    
+    public SubscribersResponse setSubscribers(List<UserInfo> subscribers) {
+      mSubscribers = subscribers;
+      return this;
+    }
+    
+    public int getTotal() {
+      return mTotal;
+    }
+    
+    public SubscribersResponse setTotal(int total) {
+      mTotal = total;
+      return this;
+    }
+    
+    public static SubscribersResponse fromJson(String json) {
+      return GsonData.getGson().fromJson(json, SubscribersResponse.class);
+    }
+  }
 }
