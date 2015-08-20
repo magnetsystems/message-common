@@ -38,6 +38,8 @@ public class MMXTopicOptions implements Serializable {
   private Boolean mSubscriptionEnabled;
   @SerializedName("description")
   private String mDescription;
+  @SerializedName("subscribeOnCreate")
+  private boolean mSubscribeOnCreate;
 
   /**
    * Get the publisher type.  Default will be {@link PublisherType#anyone}.
@@ -111,6 +113,26 @@ public class MMXTopicOptions implements Serializable {
    */
   public MMXTopicOptions setDescription(String description) {
     mDescription = description;
+    return this;
+  }
+  
+  /**
+   * Subscribe the topic for the creator when the topic is created.  It is a
+   * user subscription, not an end-point subscription.
+   * @return
+   */
+  public boolean isSubscribeOnCreate() {
+    return mSubscribeOnCreate;
+  }
+  
+  /**
+   * For topic creation only that topic will be subscribed automatically.  This
+   * option is not persisted.
+   * @param subscribe true to subscribe on topic creation; otherwise, false.
+   * @return This object.
+   */
+  public MMXTopicOptions setSubscribeOnCreate(boolean subscribe) {
+    mSubscribeOnCreate = subscribe;
     return this;
   }
   

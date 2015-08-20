@@ -20,7 +20,9 @@ import com.magnet.mmx.util.GsonData;
 import com.magnet.mmx.util.JSONifiable;
 
 /**
- * This class holds the user information.
+ * This class holds the user profile information.  All properties except user ID
+ * are optional, but it is recommended that display name and email should be
+ * specified during user registration.
  */
 public class UserInfo extends JSONifiable {
   @SerializedName("email")
@@ -44,7 +46,8 @@ public class UserInfo extends JSONifiable {
   }
   
   /**
-   * Set the new email address for the user account.  Setting to null is no-op.
+   * Set the new email address for the user account.  Setting to null means
+   * no changes during update.
    * @param email The email address of the user.
    * @return This object.
    */
@@ -62,7 +65,8 @@ public class UserInfo extends JSONifiable {
   }
   
   /**
-   * Set the new display name for the user account.  Setting to null is no-op.
+   * Set the new display name for the user profile.  Setting to null means
+   * no changes during update.
    * @param displayName The display name of the user.
    * @return This object.
    */
@@ -73,16 +77,16 @@ public class UserInfo extends JSONifiable {
 
   /**
    * Get userId for the user represented by this object.
-   * @return
+   * @return A unique user ID.
    */
   public String getUserId() {
     return userId;
   }
 
   /**
-   * Set the userId for the user.
-   * @param userId
-   * @return
+   * Set the userId for the user.  It is ignored when updating the profile.
+   * @param userId the user ID.
+   * @return This object.
    */
   public UserInfo setUserId(String userId) {
     this.userId = userId;
@@ -90,16 +94,17 @@ public class UserInfo extends JSONifiable {
   }
 
   /**
-   * Get the phone for the user
-   * @return
+   * Get the contact phone number for the user.
+   * @return A phone number or null.
    */
   public String getPhone() {
     return phone;
   }
 
   /**
-   * Set the phone for the user.
-   * @param phone
+   * Set the contact phone number for the user.  Setting to null means no
+   * changes during update.
+   * @param phone A phone number.
    * @return This object.
    */
   public UserInfo setPhone(String phone) {
@@ -109,11 +114,11 @@ public class UserInfo extends JSONifiable {
 
   @Override
   public String toString() {
-    return "UserInfo{" +
-        "email='" + email + '\'' +
-        ", displayName='" + displayName + '\'' +
-        ", userId='" + userId + '\'' +
-        ", phone='" + phone + '\'' +
+    return "UserInfo={" +
+        "userId=" + userId +
+        ", email=" + email +
+        ", displayName=" + displayName +
+        ", phone=" + phone +
         '}';
   }
 
