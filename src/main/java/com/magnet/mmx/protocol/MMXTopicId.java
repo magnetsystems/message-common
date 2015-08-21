@@ -103,7 +103,7 @@ public class MMXTopicId implements MMXTopic {
    * @return true if it is a user topic, false if it is a global topic.
    */
   public boolean isUserTopic() {
-    return mUserId != null;
+    return mEscUserId != null;
   }
 
   /**
@@ -114,7 +114,7 @@ public class MMXTopicId implements MMXTopic {
   public boolean equals(MMXTopic topic) {
     if (topic == this)
       return true;
-    if ((topic == null) || (mUserId == null ^ topic.getUserId() == null))
+    if ((topic == null) || (getUserId() == null ^ topic.getUserId() == null))
       return false;
     if ((mUserId != null) && !mUserId.equalsIgnoreCase(topic.getUserId()))
       return false;
@@ -147,7 +147,8 @@ public class MMXTopicId implements MMXTopic {
    */
   @Override
   public String toString() {
-    return (mUserId == null) ? ("*/"+mTopic) : (mUserId+'/'+mTopic);
+    String userId = getUserId();
+    return (userId == null) ? "*/"+mTopic : userId+'/'+mTopic;
   }
   
   /**
