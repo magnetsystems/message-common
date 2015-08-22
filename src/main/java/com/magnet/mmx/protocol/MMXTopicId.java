@@ -37,7 +37,7 @@ public class MMXTopicId implements MMXTopic {
   
   /**
    * @hide
-   * Constructor for a global topic.
+   * Constructor for a global topic.  The topic name is case insensitive.
    * @param topic The topic name.
    */
   public MMXTopicId(String topic) {
@@ -48,7 +48,7 @@ public class MMXTopicId implements MMXTopic {
 
   /**
    * @hide
-   * Constructor for a user topic.
+   * Constructor for a user topic.  The topic name is case insensitive.
    * @param userId The user ID in lower case of the user topic.
    * @param topic The topic name.
    */
@@ -83,7 +83,7 @@ public class MMXTopicId implements MMXTopic {
   }
 
   /**
-   * Get the topic name.
+   * Get the topic name.  The topic name is case insensitive.
    * @return The topic name.
    */
   public String getName() {
@@ -141,7 +141,8 @@ public class MMXTopicId implements MMXTopic {
   }
   
   /**
-   * Get a string representation of this topic identifier.
+   * Get a string representation of this topic identifier.  Caller must ignore
+   * the case of the string representation.
    * @return A string in "&#42/topic" for global topic or "userID/topic" for user topic.
    * @see #parse(String)
    */
