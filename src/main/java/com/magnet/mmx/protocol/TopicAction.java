@@ -191,10 +191,31 @@ public class TopicAction {
     private boolean mCollection;
     @SerializedName("options")
     private MMXTopicOptions mOptions;
+    @SerializedName("roles")
+    private List<String> roles;
 
     /**
      * Default constructor.  A path-like topic name provides a simplified syntax
-     * in hierarchical form.  The topic must not be started or ended with '/',
+     * in hierarchical form.  The topicName must not be started or ended with '/',
+     * and each node in the path can only be alphanumeric or '_'.  All the
+     * parent nodes will be created automatically and they can be subscribed.
+     * @param topicName A path like topic name.
+     * @param isPersonal True for personal topic; false for global topic.
+     * @param options A creation options or null.
+     * @param roles a list of roles.
+     */
+    public CreateRequest(String topicName, boolean isPersonal,
+                          MMXTopicOptions options,  List<String> roles) {
+      mTopic = topicName;
+      mPersonal = isPersonal;
+      mCollection = false;
+      mOptions = options;
+      this.roles = roles;
+    }
+
+    /**
+     * Default constructor.  A path-like topic name provides a simplified syntax
+     * in hierarchical form.  The topicName must not be started or ended with '/',
      * and each node in the path can only be alphanumeric or '_'.  All the
      * parent nodes will be created automatically and they can be subscribed.
      * @param topicName A path like topic name.
@@ -202,11 +223,8 @@ public class TopicAction {
      * @param options A creation options or null.
      */
     public CreateRequest(String topicName, boolean isPersonal,
-                          MMXTopicOptions options) {
-      mTopic = topicName;
-      mPersonal = isPersonal;
-      mCollection = false;
-      mOptions = options;
+                         MMXTopicOptions options) {
+      this(topicName, isPersonal, options, null);
     }
 
     /**
@@ -239,6 +257,16 @@ public class TopicAction {
      */
     public MMXTopicOptions getOptions() {
       return mOptions;
+    }
+
+    /**
+     * Get the list of roles that we need to associate with the topic.
+     * If empty the created topic will be accessible to all users (public).
+     *
+     * @return
+     */
+    public List<String> getRoles() {
+      return roles;
     }
 
     public static CreateRequest fromJson(String json) {
