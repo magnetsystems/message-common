@@ -26,6 +26,7 @@ import com.magnet.mmx.util.JSONifiable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -361,6 +362,20 @@ public class TopicAction {
 
     public static RetractRequest fromJson(String json) {
       return GsonData.getGson().fromJson(json, RetractRequest.class);
+    }
+  }
+
+  /**
+   * @hide
+   * Response payload for retracting published items from a topic.
+   */
+  public static class RetractResponse extends HashMap<String, Integer> {
+    public RetractResponse() {
+      super();
+    }
+
+    public RetractResponse(int initSize) {
+      super(initSize);
     }
   }
 

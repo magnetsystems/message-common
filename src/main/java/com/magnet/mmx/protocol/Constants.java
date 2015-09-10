@@ -64,7 +64,7 @@ public class Constants {
   /**
    * The current protocol minor version number.
    */
-  public final static int MMX_VERSION_MINOR = 3;
+  public final static int MMX_VERSION_MINOR = 6;
   /**
    * The elements for MMX.
    */
