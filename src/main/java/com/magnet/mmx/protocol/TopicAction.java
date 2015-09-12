@@ -15,6 +15,12 @@
 
 package com.magnet.mmx.protocol;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 import com.magnet.mmx.protocol.SearchAction.Match;
 import com.magnet.mmx.protocol.SearchAction.MultiValues;
@@ -22,12 +28,6 @@ import com.magnet.mmx.protocol.SearchAction.Operator;
 import com.magnet.mmx.protocol.SearchAction.SingleValue;
 import com.magnet.mmx.util.GsonData;
 import com.magnet.mmx.util.JSONifiable;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class represents the PubSub protocols and operations.
@@ -379,6 +379,26 @@ public class TopicAction {
     }
   }
 
+  public static class GetTopicsRequest extends ArrayList<MMXTopicId> {
+    public GetTopicsRequest() {
+      super(); 
+    }
+    
+    public static GetTopicsRequest fromJson(String json) {
+      return GsonData.getGson().fromJson(json, GetTopicsRequest.class);
+    }
+  }
+  
+  public static class GetTopicsResponse extends ArrayList<TopicInfo> {
+    public GetTopicsResponse() {
+      super();
+    }
+    
+    public static GetTopicsResponse fromJson(String json) {
+      return GsonData.getGson().fromJson(json, GetTopicsResponse.class);
+    }
+  }
+  
   /**
    * @hide
    * A request to access published items by ID's.

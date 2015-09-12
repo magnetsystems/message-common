@@ -311,9 +311,14 @@ public class Constants {
      */
     deletetopic,
     /**
-     * Get topic information
+     * Get topic information by a topic ID.
+     * @deprecated #getTopics
      */
     getTopic,
+    /**
+     * Get topic information by topic ID's.
+     */
+    getTopics,
     /**
      * Retract a published item or all items.
      */
