@@ -855,7 +855,8 @@ public class TopicAction {
     }
 
     /**
-     * Set the search value for topic name using the default matching type.
+     * Set the search value for topic name using the default matching type which
+     * is the prefix match.
      * @param topicName The topic name search value.
      * @return This object.
      */
@@ -891,7 +892,8 @@ public class TopicAction {
     }
 
     /**
-     * Set the search of description using the server default match.
+     * Set the search of description using the server default match which is
+     * the prefix match.
      * @param description The description search value.
      * @return This object.
      */
