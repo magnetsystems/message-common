@@ -958,8 +958,8 @@ public class TopicAction {
         throw new IllegalArgumentException("Operator cannot be null");
       if ((mLimit = limit) == 0)
         throw new IllegalArgumentException("Limit cannot be 0");
-      setTopicName(attr.getTopicName());
-      setDescription(attr.getDescription());
+      setTopicName(attr.getTopicName(), attr.getTopicNameMatch());
+      setDescription(attr.getDescription(), attr.getDescriptionMatch());
       setTags(attr.getTags());
     }
 
