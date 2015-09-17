@@ -448,6 +448,8 @@ public class TopicAction {
   public static class ListRequest extends JSONifiable {
     @SerializedName("limit")
     private Integer mLimit;
+    @SerializedName("offset")
+    private int mOffset;
     @SerializedName("recursive")
     private boolean mRecursive = true;
     @SerializedName("topicName")
@@ -473,6 +475,15 @@ public class TopicAction {
      */
     public Integer getLimit() {
       return mLimit;
+    }
+
+    public int getOffset() {
+      return mOffset;
+    }
+
+    public ListRequest setOffset(int offset) {
+      this.mOffset = offset;
+      return this;
     }
 
     /**
@@ -951,18 +962,26 @@ public class TopicAction {
     private int mOffset;
     @SerializedName("limit")
     private int mLimit;
+    @SerializedName("type")
+    private ListType mType;
 
     public TopicSearchRequest(Operator operator, TopicSearch attr, int offset,
-                               int limit) {
+                               int limit, ListType type) {
       if (attr == null)
         throw new IllegalArgumentException("Search attribute cannot be null");
       if ((mOperator = operator) == null)
         throw new IllegalArgumentException("Operator cannot be null");
       if ((mLimit = limit) == 0)
         throw new IllegalArgumentException("Limit cannot be 0");
+      mOffset = offset;
+      mType = (null == type) ? ListType.global : type;
       setTopicName(attr.getTopicName(), attr.getTopicNameMatch());
       setDescription(attr.getDescription(), attr.getDescriptionMatch());
       setTags(attr.getTags());
+    }
+
+    public TopicSearchRequest(Operator operator, TopicSearch attr, int offset, int limit) {
+      this(operator, attr, offset, limit, null);
     }
 
     public Operator getOperator() {
@@ -975,6 +994,10 @@ public class TopicAction {
 
     public int getLimit() {
       return mLimit;
+    }
+
+    public ListType getType() {
+      return mType;
     }
 
     public static TopicSearchRequest fromJson(String json) {
