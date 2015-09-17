@@ -1120,6 +1120,8 @@ public class TopicAction {
     private boolean mAscending;
     @SerializedName("maxItems")
     private int mMaxItems = -1;
+    @SerializedName("offset")
+    private int mOffset;
 
     /**
      * Get an optional subscription ID.
@@ -1208,6 +1210,24 @@ public class TopicAction {
      */
     public FetchOptions setMaxItems(int maxItems) {
       mMaxItems = maxItems;
+      return this;
+    }
+
+    /**
+     * The offset of records to be returned.
+     * @return Offset of records to be returned, 0 for using the server default.
+     */
+    public int getOffset() {
+      return mOffset;
+    }
+
+    /**
+     * Set the offset of records to be returned.
+     * @param offset
+     * @return This object.
+     */
+    public FetchOptions setOffset(int offset) {
+      mOffset = offset;
       return this;
     }
   }
@@ -1338,6 +1358,8 @@ public class TopicAction {
     private String mTopic;
     @SerializedName("limit")
     private int mLimit;
+    @SerializedName("offset")
+    private int mOffset;
     
     /**
      * 
@@ -1346,8 +1368,20 @@ public class TopicAction {
      * @param limit -1 for unlimited, or > 0.
      */
     public SubscribersRequest(String userId, String topic, int limit) {
+      this(userId, topic, 0, limit);
+    }
+
+    /**
+     *
+     * @param userId Null for global topic, user ID for the user topic.
+     * @param topic The topic name.
+     * @param offset
+     * @param limit -1 for unlimited, or > 0.
+     */
+    public SubscribersRequest(String userId, String topic, int offset, int limit) {
       mUserId = userId;
       mTopic = topic;
+      this.mOffset = offset;
       mLimit = limit;
     }
     
@@ -1362,7 +1396,15 @@ public class TopicAction {
     public int getLimit() {
       return mLimit;
     }
-    
+
+    /**
+     * The offset of records to be returned.
+     * @return Offset of records to be returned, 0 for using the server default.
+     */
+    public int getOffset() {
+      return mOffset;
+    }
+
     public static SubscribersRequest fromJson(String json) {
       return GsonData.getGson().fromJson(json, SubscribersRequest.class);
     }
