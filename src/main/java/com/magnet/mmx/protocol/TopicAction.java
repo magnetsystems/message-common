@@ -974,7 +974,7 @@ public class TopicAction {
       if ((mLimit = limit) == 0)
         throw new IllegalArgumentException("Limit cannot be 0");
       mOffset = offset;
-      mType = (null == type) ? ListType.both : type;
+      mType = (null == type) ? ListType.global : type;
       setTopicName(attr.getTopicName(), attr.getTopicNameMatch());
       setDescription(attr.getDescription(), attr.getDescriptionMatch());
       setTags(attr.getTags());
