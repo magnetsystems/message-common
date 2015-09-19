@@ -63,7 +63,7 @@ public class TopicSummary {
    * Get the topic name.
    * @return
    */
-  public MMXTopic getTopicNode() {
+  public MMXTopicId getTopicNode() {
     return mTopic;
   }
 
