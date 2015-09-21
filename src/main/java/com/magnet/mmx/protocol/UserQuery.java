@@ -15,6 +15,8 @@
 
 package com.magnet.mmx.protocol;
 
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 import com.magnet.mmx.protocol.SearchAction.Match;
 import com.magnet.mmx.protocol.SearchAction.MultiValues;
@@ -22,8 +24,6 @@ import com.magnet.mmx.protocol.SearchAction.Operator;
 import com.magnet.mmx.protocol.SearchAction.SingleValue;
 import com.magnet.mmx.util.GsonData;
 import com.magnet.mmx.util.JSONifiable;
-
-import java.util.List;
 
 /**
  * Request and response for user search.
@@ -49,8 +49,8 @@ public class UserQuery {
         throw new IllegalArgumentException("Offset cannot be less than 0");
       if ((mLimit = limit) == 0)
         throw new IllegalArgumentException("Limit cannot be 0");
-      setDisplayName(attr.getDisplayName());
-      setEmail(attr.getEmail());
+      setDisplayName(attr.getDisplayName(), attr.getDisplayNameMatch());
+      setEmail(attr.getEmail(), attr.getEmailMatch());
       setPhone(attr.getPhone());
       setTags(attr.getTags());
     }

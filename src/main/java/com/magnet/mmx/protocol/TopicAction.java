@@ -15,6 +15,12 @@
 
 package com.magnet.mmx.protocol;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 import com.magnet.mmx.protocol.SearchAction.Match;
 import com.magnet.mmx.protocol.SearchAction.MultiValues;
@@ -22,11 +28,6 @@ import com.magnet.mmx.protocol.SearchAction.Operator;
 import com.magnet.mmx.protocol.SearchAction.SingleValue;
 import com.magnet.mmx.util.GsonData;
 import com.magnet.mmx.util.JSONifiable;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * This class represents the PubSub protocols and operations.
@@ -394,6 +395,40 @@ public class TopicAction {
 
   /**
    * @hide
+   * Response payload for retracting published items from a topic.
+   */
+  public static class RetractResponse extends HashMap<String, Integer> {
+    public RetractResponse() {
+      super();
+    }
+
+    public RetractResponse(int initSize) {
+      super(initSize);
+    }
+  }
+
+  public static class GetTopicsRequest extends ArrayList<MMXTopicId> {
+    public GetTopicsRequest() {
+      super(); 
+    }
+    
+    public static GetTopicsRequest fromJson(String json) {
+      return GsonData.getGson().fromJson(json, GetTopicsRequest.class);
+    }
+  }
+  
+  public static class GetTopicsResponse extends ArrayList<TopicInfo> {
+    public GetTopicsResponse() {
+      super();
+    }
+    
+    public static GetTopicsResponse fromJson(String json) {
+      return GsonData.getGson().fromJson(json, GetTopicsResponse.class);
+    }
+  }
+  
+  /**
+   * @hide
    * A request to access published items by ID's.
    */
   public static class ItemsByIdsRequest extends JSONifiable {
@@ -441,6 +476,8 @@ public class TopicAction {
   public static class ListRequest extends JSONifiable {
     @SerializedName("limit")
     private Integer mLimit;
+    @SerializedName("offset")
+    private int mOffset;
     @SerializedName("recursive")
     private boolean mRecursive = true;
     @SerializedName("topicName")
@@ -466,6 +503,15 @@ public class TopicAction {
      */
     public Integer getLimit() {
       return mLimit;
+    }
+
+    public int getOffset() {
+      return mOffset;
+    }
+
+    public ListRequest setOffset(int offset) {
+      this.mOffset = offset;
+      return this;
     }
 
     /**
@@ -848,7 +894,8 @@ public class TopicAction {
     }
 
     /**
-     * Set the search value for topic name using the default matching type.
+     * Set the search value for topic name using the default matching type which
+     * is the prefix match.
      * @param topicName The topic name search value.
      * @return This object.
      */
@@ -884,7 +931,8 @@ public class TopicAction {
     }
 
     /**
-     * Set the search of description using the server default match.
+     * Set the search of description using the server default match which is
+     * the prefix match.
      * @param description The description search value.
      * @return This object.
      */
@@ -942,18 +990,26 @@ public class TopicAction {
     private int mOffset;
     @SerializedName("limit")
     private int mLimit;
+    @SerializedName("type")
+    private ListType mType;
 
     public TopicSearchRequest(Operator operator, TopicSearch attr, int offset,
-                               int limit) {
+                               int limit, ListType type) {
       if (attr == null)
         throw new IllegalArgumentException("Search attribute cannot be null");
       if ((mOperator = operator) == null)
         throw new IllegalArgumentException("Operator cannot be null");
       if ((mLimit = limit) == 0)
         throw new IllegalArgumentException("Limit cannot be 0");
-      setTopicName(attr.getTopicName());
-      setDescription(attr.getDescription());
+      mOffset = offset;
+      mType = (null == type) ? ListType.global : type;
+      setTopicName(attr.getTopicName(), attr.getTopicNameMatch());
+      setDescription(attr.getDescription(), attr.getDescriptionMatch());
       setTags(attr.getTags());
+    }
+
+    public TopicSearchRequest(Operator operator, TopicSearch attr, int offset, int limit) {
+      this(operator, attr, offset, limit, null);
     }
 
     public Operator getOperator() {
@@ -966,6 +1022,10 @@ public class TopicAction {
 
     public int getLimit() {
       return mLimit;
+    }
+
+    public ListType getType() {
+      return mType;
     }
 
     public static TopicSearchRequest fromJson(String json) {
@@ -1111,6 +1171,8 @@ public class TopicAction {
     private boolean mAscending;
     @SerializedName("maxItems")
     private int mMaxItems = -1;
+    @SerializedName("offset")
+    private int mOffset;
 
     /**
      * Get an optional subscription ID.
@@ -1199,6 +1261,24 @@ public class TopicAction {
      */
     public FetchOptions setMaxItems(int maxItems) {
       mMaxItems = maxItems;
+      return this;
+    }
+
+    /**
+     * The offset of records to be returned.
+     * @return Offset of records to be returned, 0 for using the server default.
+     */
+    public int getOffset() {
+      return mOffset;
+    }
+
+    /**
+     * Set the offset of records to be returned.
+     * @param offset
+     * @return This object.
+     */
+    public FetchOptions setOffset(int offset) {
+      mOffset = offset;
       return this;
     }
   }
@@ -1329,6 +1409,8 @@ public class TopicAction {
     private String mTopic;
     @SerializedName("limit")
     private int mLimit;
+    @SerializedName("offset")
+    private int mOffset;
     
     /**
      * 
@@ -1337,8 +1419,20 @@ public class TopicAction {
      * @param limit -1 for unlimited, or > 0.
      */
     public SubscribersRequest(String userId, String topic, int limit) {
+      this(userId, topic, 0, limit);
+    }
+
+    /**
+     *
+     * @param userId Null for global topic, user ID for the user topic.
+     * @param topic The topic name.
+     * @param offset
+     * @param limit -1 for unlimited, or > 0.
+     */
+    public SubscribersRequest(String userId, String topic, int offset, int limit) {
       mUserId = userId;
       mTopic = topic;
+      this.mOffset = offset;
       mLimit = limit;
     }
     
@@ -1353,7 +1447,15 @@ public class TopicAction {
     public int getLimit() {
       return mLimit;
     }
-    
+
+    /**
+     * The offset of records to be returned.
+     * @return Offset of records to be returned, 0 for using the server default.
+     */
+    public int getOffset() {
+      return mOffset;
+    }
+
     public static SubscribersRequest fromJson(String json) {
       return GsonData.getGson().fromJson(json, SubscribersRequest.class);
     }
