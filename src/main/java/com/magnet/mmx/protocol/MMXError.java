@@ -15,6 +15,8 @@
 
 package com.magnet.mmx.protocol;
 
+import java.util.Arrays;
+
 import com.google.gson.annotations.SerializedName;
 import com.magnet.mmx.util.GsonData;
 import com.magnet.mmx.util.JSONifiable;
@@ -54,6 +56,8 @@ public class MMXError extends JSONifiable {
   private Severity mSeverity = Severity.UNKNOWN;
   @SerializedName("msgId")
   private String mMsgId;
+  @SerializedName("params")
+  private String[] mParams;
   
   /**
    * Constructor with a status code.
@@ -126,10 +130,32 @@ public class MMXError extends JSONifiable {
     return this;
   }
 
+  /**
+   * Get optional parameters for this error.
+   * 
+   * @return Optional parameters or null.
+   */
+  public String[] getParams() {
+    return mParams;
+  }
+
+  /**
+   * Set optional parameters to this error.
+   * 
+   * @param params
+   *          Optional parameters for this specific error.
+   * @return This object.
+   */
+  public MMXError setParams(String... params) {
+    mParams = params;
+    return this;
+  }
+
   @Override
   public String toString() {
     return "[code="+mCode+", msg="+mMessage+", severity="+mSeverity+
-            ", msgId="+mMsgId+"]";
+            ", msgId="+mMsgId+", params="+((mParams == null) ?
+                null : Arrays.asList(mParams))+"]";
   }
   
   /**
