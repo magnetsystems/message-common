@@ -448,5 +448,5 @@ public class Constants {
    * A special address for MMX multicast.  When a message has multiple
    * recipients, the message should be sent to this address.
    */
-  public static final String MMX_MULTICAST = "mmx-multicast";
+  public static final String MMX_MULTICAST = "mmx$multicast";
 }
