@@ -64,7 +64,7 @@ public class Constants {
   /**
    * The current protocol minor version number.
    */
-  public final static int MMX_VERSION_MINOR = 3;
+  public final static int MMX_VERSION_MINOR = 6;
   /**
    * The elements for MMX.
    */
@@ -311,9 +311,14 @@ public class Constants {
      */
     deletetopic,
     /**
-     * Get topic information
+     * Get topic information by a topic ID.
+     * @deprecated #getTopics
      */
     getTopic,
+    /**
+     * Get topic information by topic ID's.
+     */
+    getTopics,
     /**
      * Retract a published item or all items.
      */
