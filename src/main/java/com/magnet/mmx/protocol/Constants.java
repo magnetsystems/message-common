@@ -444,4 +444,9 @@ public class Constants {
    * A partial display name for user's geo-location topic.
    */
   public static final String MMX_TOPIC_GEOLOCATION = "GeoLocation";
+  /**
+   * A special address for MMX multicast.  When a message has multiple
+   * recipients, the message should be sent to this address.
+   */
+  public static final String MMX_MULTICAST = "mmx$multicast";
 }
