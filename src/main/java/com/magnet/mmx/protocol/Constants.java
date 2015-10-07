@@ -243,6 +243,14 @@ public class Constants {
      */
     PENDING,
     /**
+     * Multicast message has been submitted to the server.
+     */
+    SUBMITTED,
+    /**
+     * Message has been accepted and validated by the server.
+     */
+    ACCEPTED,
+    /**
      * Recipient is offline and hence we need to send a wake-up notification
      */
     WAKEUP_REQUIRED,
@@ -449,4 +457,10 @@ public class Constants {
    * recipients, the message should be sent to this address.
    */
   public static final String MMX_MULTICAST = "mmx$multicast";
+  /**
+   * Keys for the unicast message server ack, multicast message acks.
+   */
+  public static final String SERVER_ACK_KEY = "serverack";
+  public static final String BEGIN_ACK_KEY = "beginack";
+  public static final String END_ACK_KEY = "endack";
 }
