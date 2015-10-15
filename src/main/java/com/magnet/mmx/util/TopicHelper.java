@@ -15,22 +15,27 @@
 
 package com.magnet.mmx.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.magnet.mmx.protocol.Constants;
 import com.magnet.mmx.protocol.MMXTopicId;
 import com.magnet.mmx.protocol.OSType;
 import com.magnet.mmx.protocol.TopicAction;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * @hide
- * A helper class for topics in PubSub.
+ * A helper class for topics in PubSub.  There are two formats for user topic:
+ * userID/topicName (internal node path) and useID#topicName (used in a path for
+ * REST API.)  Use TopicResource.nameToId() or TopicResource.idToName() to
+ * encode/decode userID#topicName; otherwise, use {@link #parseNode(String)}
+ * or {@link #makeTopic(String, String, String)} to encode/decode userID/topicName.
  */
 public class TopicHelper {
   private static boolean TOPIC_RESTRICTED_NAME = true;  // true for MOB-1423
   public final static char TOPIC_DELIM = '/';
   public final static char TOPIC_FOR_APP = '*';
+  public final static char TOPIC_SEPARATOR = '#';   // use in URL only; userID#topicName
   public final static String TOPIC_FOR_APP_STR = String.valueOf(TOPIC_FOR_APP);
   public final static String TOPIC_GEOLOC = "com.magnet.geoloc";  // a leaf node
   public final static String TOPIC_OS_ROOT = "com.magnet.os";
