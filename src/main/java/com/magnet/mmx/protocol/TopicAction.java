@@ -1337,6 +1337,8 @@ public class TopicAction {
     private String mUserId;
     @SerializedName("topicName")
     private String mTopic;
+    @SerializedName("totalCount")
+    private int mTotal;
     @SerializedName("items")
     private List<MMXPublishedItem> mItems;
 
@@ -1346,9 +1348,11 @@ public class TopicAction {
      * @param topic
      * @param items
      */
-    public FetchResponse(String userId, String topic, List<MMXPublishedItem> items) {
+    public FetchResponse(String userId, String topic, int total,
+        List<MMXPublishedItem> items) {
       mUserId = userId;
       mTopic = topic;
+      mTotal = total;
       mItems = items;
     }
 
@@ -1360,9 +1364,12 @@ public class TopicAction {
       return mTopic;
     }
 
-
     public List<MMXPublishedItem> getItems() {
       return mItems;
+    }
+
+    public int getTotal() {
+      return mTotal;
     }
 
     public static FetchResponse fromJson(String json) {
