@@ -28,6 +28,7 @@ public class Constants {
    * The max length for topic name.
    */
   public final static int MMX_MAX_TOPIC_LEN = 50;
+  public final static int MMX_MAX_CHANNEL_LEN = 50;
   /**
    * The max length for tag name.
    */
