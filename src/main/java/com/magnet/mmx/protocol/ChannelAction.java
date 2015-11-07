@@ -15,12 +15,6 @@
 
 package com.magnet.mmx.protocol;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
 import com.google.gson.annotations.SerializedName;
 import com.magnet.mmx.protocol.SearchAction.Match;
 import com.magnet.mmx.protocol.SearchAction.MultiValues;
@@ -29,101 +23,84 @@ import com.magnet.mmx.protocol.SearchAction.SingleValue;
 import com.magnet.mmx.util.GsonData;
 import com.magnet.mmx.util.JSONifiable;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * This class represents the PubSub protocols and operations.
  *
  */
-public class TopicAction {
-  /**
-   * The role who can publish.
-   */
-  public static enum PublisherType {
-    /**
-     * Anyone can publish.
-     */
-    anyone,
-    /**
-     * Owner (as a sole publisher) can publish.
-     */
-    owner,
-    /**
-     * Owner and subscribers can publish.
-     */
-    subscribers;
-    public static final String[] names=new String[values().length];
-    static {
-      PublisherType[] values=values();
-      for(int i=0;i<values.length;i++)
-        names[i]=values[i].name();
-    }
-  };
+public class ChannelAction {
 
   /**
    * @hide
-   * Filter for topic listings.
+   * Filter for channel listings.
    */
   public static enum ListType {
     /**
-     * List global topics only
+     * List global channels only
      */
     global,
     /**
-     * List personal topics only.
+     * List personal channels only.
      */
     personal,
     /**
-     * List both global and personal topics.
+     * List both global and personal channels.
      */
     both,
   }
 
   /**
-   * The topic tags.
+   * The channel tags.
    */
-  public static class TopicTags extends JSONifiable {
+  public static class ChannelTags extends JSONifiable {
     @SerializedName("userId")
     private String mUserId;
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("tags")
     private List<String> mTags;
     @SerializedName("lastModTime")
     private Date mLastModTime;
-    private transient MMXTopic mMMXTopic;
+    private transient MMXChannel mMMXChannel;
 
     /**
      * @hide
      * Constructor for the request of setting the tags.  Setting an empty list
      * will remove all tags.
-     * @param userId The user ID for a personal topic, null for global topic.
-     * @param topic The topic name.
+     * @param userId The user ID for a personal channel, null for global channel.
+     * @param channel The channel name.
      * @param tags A list of tags or an empty list.
      */
-    public TopicTags(String userId, String topic, List<String> tags) {
+    public ChannelTags(String userId, String channel, List<String> tags) {
       mUserId = userId;
-      mTopic = topic;
+      mChannel = channel;
       mTags = tags;
     }
 
     /**
      * @hide
      * Constructor for the response of getting the tags.
-     * @param userId The user ID for a personal topic, null for global topic.
-     * @param topic The topic name.
+     * @param userId The user ID for a personal channel, null for global channel.
+     * @param channel The channel name.
      * @param tags A list of tags or an empty list.
      * @param lastModTime The last modified time.
      */
-    public TopicTags(String userId, String topic, List<String> tags, Date lastModTime) {
+    public ChannelTags(String userId, String channel, List<String> tags, Date lastModTime) {
       mUserId = userId;
-      mTopic = topic;
+      mChannel = channel;
       mTags = tags;
       mLastModTime = lastModTime;
     }
 
     /**
      * @hide
-     * Get the user ID of the personal topic.
-     * @return The user ID of personal topic, or null for global topic.
+     * Get the user ID of the personal channel.
+     * @return The user ID of personal channel, or null for global channel.
      */
     public String getUserId() {
       return mUserId;
@@ -131,21 +108,21 @@ public class TopicAction {
 
     /**
      * @hide
-     * Get the topic name.
-     * @return A topic name.
+     * Get the channel name.
+     * @return A channel name.
      */
-    public String getTopicName() {
-      return mTopic;
+    public String getChannelName() {
+      return mChannel;
     }
 
     /**
-     * Get the topic associated with these tags.
-     * @return The topic.
+     * Get the channel associated with these tags.
+     * @return The channel.
      */
-    public MMXTopic getTopic() {
-      if (mMMXTopic == null)
-        mMMXTopic = new MMXTopicId(mUserId, mTopic);
-      return mMMXTopic;
+    public MMXChannel getChannel() {
+      if (mMMXChannel == null)
+        mMMXChannel = new MMXChannelId(mUserId, mChannel);
+      return mMMXChannel;
     }
     
     /**
@@ -166,26 +143,26 @@ public class TopicAction {
 
     @Override
     public String toString() {
-      return "[userId="+mUserId+", topic="+mTopic+", modTime="+mLastModTime+
+      return "[userId="+mUserId+", channel="+mChannel+", modTime="+mLastModTime+
               ", tags="+mTags+"]";
     }
 
     /**
      * @hide
      */
-    public static TopicTags fromJson(String json) {
-      return GsonData.getGson().fromJson(json, TopicTags.class);
+    public static ChannelTags fromJson(String json) {
+      return GsonData.getGson().fromJson(json, ChannelTags.class);
     }
   }
 
   /**
    * @hide
-   * Request payload for creating a topic.  The topic to be created can always
+   * Request payload for creating a channel.  The channel to be created can always
    * be published and subscribed.
    */
   public static class CreateRequest extends JSONifiable {
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("isPersonal")
     private boolean mPersonal;
     @SerializedName("isCollection")
@@ -196,18 +173,18 @@ public class TopicAction {
     private List<String> roles;
 
     /**
-     * Default constructor.  A path-like topic name provides a simplified syntax
-     * in hierarchical form.  The topicName must not be started or ended with '/',
+     * Default constructor.  A path-like channel name provides a simplified syntax
+     * in hierarchical form.  The channelName must not be started or ended with '/',
      * and each node in the path can only be alphanumeric or '_'.  All the
      * parent nodes will be created automatically and they can be subscribed.
-     * @param topicName A path like topic name.
-     * @param isPersonal True for personal topic; false for global topic.
+     * @param channelName A path like channel name.
+     * @param isPersonal True for personal channel; false for global channel.
      * @param options A creation options or null.
      * @param roles a list of roles.
      */
-    public CreateRequest(String topicName, boolean isPersonal,
-                          MMXTopicOptions options,  List<String> roles) {
-      mTopic = topicName;
+    public CreateRequest(String channelName, boolean isPersonal,
+                         MMXTopicOptions options,  List<String> roles) {
+      mChannel = channelName;
       mPersonal = isPersonal;
       mCollection = false;
       mOptions = options;
@@ -215,30 +192,30 @@ public class TopicAction {
     }
 
     /**
-     * Default constructor.  A path-like topic name provides a simplified syntax
-     * in hierarchical form.  The topicName must not be started or ended with '/',
+     * Default constructor.  A path-like channel name provides a simplified syntax
+     * in hierarchical form.  The channelName must not be started or ended with '/',
      * and each node in the path can only be alphanumeric or '_'.  All the
      * parent nodes will be created automatically and they can be subscribed.
-     * @param topicName A path like topic name.
-     * @param isPersonal True for personal topic; false for global topic.
+     * @param channelName A path like channel name.
+     * @param isPersonal True for personal channel; false for global channel.
      * @param options A creation options or null.
      */
-    public CreateRequest(String topicName, boolean isPersonal,
+    public CreateRequest(String channelName, boolean isPersonal,
                          MMXTopicOptions options) {
-      this(topicName, isPersonal, options, null);
+      this(channelName, isPersonal, options, null);
     }
 
     /**
-     * Get the topic name.
-     * @return The topic name.
+     * Get the channel name.
+     * @return The channel name.
      */
-    public String getTopicName() {
-      return mTopic;
+    public String getChannelName() {
+      return mChannel;
     }
 
     /**
-     * Check if the creating topic is personal.
-     * @return true for personal topic, false for global topic.
+     * Check if the creating channel is personal.
+     * @return true for personal channel, false for global channel.
      */
     public boolean isPersonal() {
       return mPersonal;
@@ -246,14 +223,14 @@ public class TopicAction {
 
     /**
      * @hide
-     * @return true to create this topic as a collection; false to create it as leaf node.
+     * @return true to create this channel as a collection; false to create it as leaf node.
      */
     public boolean isCollection() {
       return mCollection;
     }
 
     /**
-     * Get the topic creation options.
+     * Get the channel creation options.
      * @return The creation options, or null.
      */
     public MMXTopicOptions getOptions() {
@@ -261,8 +238,8 @@ public class TopicAction {
     }
 
     /**
-     * Get the list of roles that we need to associate with the topic.
-     * If empty the created topic will be accessible to all users (public).
+     * Get the list of roles that we need to associate with the channel.
+     * If empty the created channel will be accessible to all users (public).
      *
      * @return
      */
@@ -277,35 +254,35 @@ public class TopicAction {
 
   /**
    * @hide
-   * Delete a topic and its children if it is a collection.
+   * Delete a channel and its children if it is a collection.
    */
   public static class DeleteRequest extends JSONifiable {
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("isPersonal")
     private boolean mPersonal;
 
     /**
-     * Default constructor for the topic deletion request.
-     * @param topic A path like topic name.
-     * @param isPersonal True for personal topic; false for global topic.
+     * Default constructor for the channel deletion request.
+     * @param channel A path like channel name.
+     * @param isPersonal True for personal channel; false for global channel.
      */
-    public DeleteRequest(String topic, boolean isPersonal) {
-      mTopic = topic;
+    public DeleteRequest(String channel, boolean isPersonal) {
+      mChannel = channel;
       mPersonal = isPersonal;
     }
 
     /**
-     * Get the topic name.
-     * @return The topic name.
+     * Get the channel name.
+     * @return The channel name.
      */
-    public String getTopic() {
-      return mTopic;
+    public String getChannel() {
+      return mChannel;
     }
 
     /**
-     * Check if the deleting topic is personal.
-     * @return true for personal topic, false for global topic.
+     * Check if the deleting channel is personal.
+     * @return true for personal channel, false for global channel.
      */
     public boolean isPersonal() {
       return mPersonal;
@@ -318,27 +295,27 @@ public class TopicAction {
 
   /**
    * @hide
-   * Request payload for retracting all published items from the topic owner.
+   * Request payload for retracting all published items from the channel owner.
    */
   public static class RetractAllRequest extends JSONifiable {
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("isPersonal")
     private boolean mPersonal;
 
     /**
-     * Constructor to retract all published items from a personal topic or
-     * global topic owned by the requester.
-     * @param topic A path like topic name.
-     * @param isPersonal true for a personal topic; false for global topic.
+     * Constructor to retract all published items from a personal channel or
+     * global channel owned by the requester.
+     * @param channel A path like channel name.
+     * @param isPersonal true for a personal channel; false for global channel.
      */
-    public RetractAllRequest(String topic, boolean isPersonal) {
-      mTopic = topic;
+    public RetractAllRequest(String channel, boolean isPersonal) {
+      mChannel = channel;
       mPersonal = isPersonal;
     }
 
-    public String getTopic() {
-      return mTopic;
+    public String getChannel() {
+      return mChannel;
     }
 
     public boolean isPersonal() {
@@ -352,27 +329,27 @@ public class TopicAction {
 
   /**
    * @hide
-   * Request payload for retracting published items from a topic.  The requester
+   * Request payload for retracting published items from a channel.  The requester
    * must have proper permission to remove the items.
    */
   public static class RetractRequest extends JSONifiable {
     @SerializedName("userId")
     private String mUserId;
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("itemIds")
     private List<String> mItemIds;
 
     /**
-     * Constructor to retract published items from a topic.  The requester must
+     * Constructor to retract published items from a channel.  The requester must
      * have permission to retract the published items.
-     * @param userId User ID of a personal topic or null for global topic.
-     * @param topic A path like topic name.
+     * @param userId User ID of a personal channel or null for global channel.
+     * @param channel A path like channel name.
      * @param itemIds Published item ID's to be retracted.
      */
-    public RetractRequest(String userId, String topic, List<String> itemIds) {
+    public RetractRequest(String userId, String channel, List<String> itemIds) {
       mUserId = userId;
-      mTopic = topic;
+      mChannel = channel;
       mItemIds = itemIds;
     }
 
@@ -380,8 +357,8 @@ public class TopicAction {
       return mUserId;
     }
 
-    public String getTopic() {
-      return mTopic;
+    public String getChannel() {
+      return mChannel;
     }
 
     public List<String> getItemIds() {
@@ -395,7 +372,7 @@ public class TopicAction {
 
   /**
    * @hide
-   * Response payload for retracting published items from a topic.
+   * Response payload for retracting published items from a channel.
    */
   public static class RetractResponse extends HashMap<String, Integer> {
     public RetractResponse() {
@@ -407,23 +384,23 @@ public class TopicAction {
     }
   }
 
-  public static class GetTopicsRequest extends ArrayList<MMXTopicId> {
-    public GetTopicsRequest() {
+  public static class GetChannelsRequest extends ArrayList<MMXChannelId> {
+    public GetChannelsRequest() {
       super(); 
     }
     
-    public static GetTopicsRequest fromJson(String json) {
-      return GsonData.getGson().fromJson(json, GetTopicsRequest.class);
+    public static GetChannelsRequest fromJson(String json) {
+      return GsonData.getGson().fromJson(json, GetChannelsRequest.class);
     }
   }
   
-  public static class GetTopicsResponse extends ArrayList<TopicInfo> {
-    public GetTopicsResponse() {
+  public static class GetChannelsResponse extends ArrayList<ChannelInfo> {
+    public GetChannelsResponse() {
       super();
     }
     
-    public static GetTopicsResponse fromJson(String json) {
-      return GsonData.getGson().fromJson(json, GetTopicsResponse.class);
+    public static GetChannelsResponse fromJson(String json) {
+      return GsonData.getGson().fromJson(json, GetChannelsResponse.class);
     }
   }
   
@@ -434,20 +411,20 @@ public class TopicAction {
   public static class ItemsByIdsRequest extends JSONifiable {
     @SerializedName("userId")
     private String mUserId;
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("itemIds")
     private List<String> mItemIds;
     
     /**
-     * Constructor to get published items from a topic by item ID's.
-     * @param userId User ID of a user topic or null for global topic.
-     * @param topic A path like topic name.
+     * Constructor to get published items from a channel by item ID's.
+     * @param userId User ID of a user channel or null for global channel.
+     * @param channel A path like channel name.
      * @param itemIds Published item ID's.
      */
-    public ItemsByIdsRequest(String userId, String topic, List<String> itemIds) {
+    public ItemsByIdsRequest(String userId, String channel, List<String> itemIds) {
       mUserId = userId;
-      mTopic = topic;
+      mChannel = channel;
       mItemIds = itemIds;
     }
 
@@ -455,8 +432,8 @@ public class TopicAction {
       return mUserId;
     }
 
-    public String getTopic() {
-      return mTopic;
+    public String getChannel() {
+      return mChannel;
     }
 
     public List<String> getItemIds() {
@@ -470,8 +447,8 @@ public class TopicAction {
   
   /**
    * @hide
-   * Request payload for listing all topics with a specified limit.  If no
-   * limit is specified, no maximum number of topics will be imposed.
+   * Request payload for listing all channels with a specified limit.  If no
+   * limit is specified, no maximum number of channels will be imposed.
    */
   public static class ListRequest extends JSONifiable {
     @SerializedName("limit")
@@ -480,13 +457,13 @@ public class TopicAction {
     private int mOffset;
     @SerializedName("recursive")
     private boolean mRecursive = true;
-    @SerializedName("topicName")
+    @SerializedName("channelName")
     private String mStart;
     @SerializedName("type")
     private ListType mType;
 
     /**
-     * Optionally set a limit on the returning topics.
+     * Optionally set a limit on the returning channels.
      * @param limit A positive number.
      * @return This object.
      */
@@ -558,10 +535,9 @@ public class TopicAction {
 
   /**
    * @hide
-   * Response payload for listing all topics.
+   * Response payload for listing all channels.
    */
-  public static class ListResponse extends ArrayList<TopicInfo> {
-    private static final long serialVersionUID = -6398262288133254269L;
+  public static class ListResponse extends ArrayList<ChannelInfo> {
 
     /**
      * @hide
@@ -589,49 +565,49 @@ public class TopicAction {
   public static class SubscribeRequest extends JSONifiable {
     @SerializedName("userId")
     private String mUserId;
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("devId")
     private String mDevId;
     @SerializedName("errorOnDup")
     private boolean mErrorOnDup;
 
     /**
-     * Subscription request for a global topic.
-     * @param topic The topic name.
+     * Subscription request for a global channel.
+     * @param channel The channel name.
      * @param devId A device ID for this subscription or null for all devices.
      */
-    public SubscribeRequest(String topic, String devId) {
-      mTopic = topic;
+    public SubscribeRequest(String channel, String devId) {
+      mChannel = channel;
       mDevId = devId;
     }
 
     /**
-     * Subscription request for a personal topic.
-     * @param userId The user ID of a personal topic.
-     * @param topic The topic name.
+     * Subscription request for a personal channel.
+     * @param userId The user ID of a personal channel.
+     * @param channel The channel name.
      * @param devId A device ID for this subscription or null for all devices.
      */
-    public SubscribeRequest(String userId, String topic, String devId) {
+    public SubscribeRequest(String userId, String channel, String devId) {
       mUserId = userId;
-      mTopic = topic;
+      mChannel = channel;
       mDevId = devId;
     }
 
     /**
-     * Get the user ID of a personal topic.
-     * @return A user ID of a personal topic, or null for global topic.
+     * Get the user ID of a personal channel.
+     * @return A user ID of a personal channel, or null for global channel.
      */
     public String getUserId() {
       return mUserId;
     }
 
     /**
-     * Get the topic name.
-     * @return The topic name.
+     * Get the channel name.
+     * @return The channel name.
      */
-    public String getTopic() {
-      return mTopic;
+    public String getChannel() {
+      return mChannel;
     }
 
     /**
@@ -724,47 +700,47 @@ public class TopicAction {
   public static class UnsubscribeRequest extends JSONifiable {
     @SerializedName("userId")
     private String mUserId;
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("subscriptionId")
     private String mSubId;
 
     /**
-     * Constructor for unsubscribing a global topic.
-     * @param topic The topic name.
-     * @param subId A subscription ID or null for all subscriptions to the topic.
+     * Constructor for unsubscribing a global channel.
+     * @param channel The channel name.
+     * @param subId A subscription ID or null for all subscriptions to the channel.
      */
-    public UnsubscribeRequest(String topic, String subId) {
-      mTopic = topic;
+    public UnsubscribeRequest(String channel, String subId) {
+      mChannel = channel;
       mSubId = subId;
     }
 
     /**
-     * Constructor for unsubscribing a personal topic.
-     * @param userId The user ID of a personal topic.
-     * @param topic The topic name.
-     * @param subId A subscription ID or null for all subscriptions to the topic.
+     * Constructor for unsubscribing a personal channel.
+     * @param userId The user ID of a personal channel.
+     * @param channel The channel name.
+     * @param subId A subscription ID or null for all subscriptions to the channel.
      */
-    public UnsubscribeRequest(String userId, String topic, String subId) {
+    public UnsubscribeRequest(String userId, String channel, String subId) {
       mUserId = userId;
-      mTopic = topic;
+      mChannel = channel;
       mSubId = subId;
     }
 
     /**
-     * Get the user ID of the personal topic.
-     * @return The user ID of the personal topic, or null.
+     * Get the user ID of the personal channel.
+     * @return The user ID of the personal channel, or null.
      */
     public String getUserId() {
       return mUserId;
     }
 
     /**
-     * Get the topic name.
-     * @return The topic name.
+     * Get the channel name.
+     * @return The channel name.
      */
-    public String getTopic() {
-      return mTopic;
+    public String getChannel() {
+      return mChannel;
     }
 
     /**
@@ -811,22 +787,22 @@ public class TopicAction {
 
   /**
    * @hide
-   * Request for the summary of a list of topics.
+   * Request for the summary of a list of channels.
    */
   public static class SummaryRequest extends JSONifiable {
-    @SerializedName("topicNodes")
-    private List<MMXTopicId> mTopics;
+    @SerializedName("channelNodes")
+    private List<MMXChannelId> mChannels;
     @SerializedName("since")
     private Date mSince;
     @SerializedName("until")
     private Date mUntil;
 
-    public SummaryRequest(List<MMXTopicId> topics) {
-      mTopics = topics;
+    public SummaryRequest(List<MMXChannelId> channels) {
+      mChannels = channels;
     }
 
-    public List<MMXTopicId> getTopicNodes() {
-      return mTopics;
+    public List<MMXChannelId> getChannelNodes() {
+      return mChannels;
     }
     
     public Date getSince() {
@@ -854,9 +830,9 @@ public class TopicAction {
 
   /**
    * @hide
-   * Response of the topic summary.
+   * Response of the channel summary.
    */
-  public static class SummaryResponse extends ArrayList<TopicSummary> {
+  public static class SummaryResponse extends ArrayList<ChannelSummary> {
     public SummaryResponse() {
       super();
     }
@@ -867,10 +843,10 @@ public class TopicAction {
   }
 
   /**
-   * Attributes for topic search.
+   * Attributes for channel search.
    */
-  public static class TopicSearch extends JSONifiable {
-    @SerializedName("topicName")
+  public static class ChannelSearch extends JSONifiable {
+    @SerializedName("channelName")
     private SingleValue mDisplayName;
     @SerializedName("description")
     private SingleValue mDescription;
@@ -878,44 +854,44 @@ public class TopicAction {
     private MultiValues mTags;
 
     /**
-     * Get the searching topic name.
-     * @return The topic name search value.
+     * Get the searching channel name.
+     * @return The channel name search value.
      */
-    public String getTopicName() {
+    public String getChannelName() {
       return mDisplayName != null ? mDisplayName.getValue() : null;
     }
 
     /**
-     * Get the match type of topic name.
+     * Get the match type of channel name.
      * @return
      */
-    public Match getTopicNameMatch() {
+    public Match getChannelNameMatch() {
       return mDisplayName != null ? mDisplayName.getMatch() : null;
     }
 
     /**
-     * Set the search value for topic name using the default matching type which
+     * Set the search value for channel name using the default matching type which
      * is the prefix match.
-     * @param topicName The topic name search value.
+     * @param channelName The channel name search value.
      * @return This object.
      */
-    public TopicSearch setTopicName(String topicName) {
-      return setTopicName(topicName, null);
+    public ChannelSearch setChannelName(String channelName) {
+      return setChannelName(channelName, null);
     }
 
     /**
-     * Specify the topic name to be searched.
-     * @param topicName The topic name search value.
+     * Specify the channel name to be searched.
+     * @param channelName The channel name search value.
      * @param matchType The match type.
      * @return This object.
      */
-    public TopicSearch setTopicName(String topicName, Match matchType) {
-      mDisplayName = new SingleValue(topicName, matchType);
+    public ChannelSearch setChannelName(String channelName, Match matchType) {
+      mDisplayName = new SingleValue(channelName, matchType);
       return this;
     }
 
     /**
-     * Get the searching topic description.
+     * Get the searching channel description.
      * @return The description search value.
      */
     public String getDescription() {
@@ -936,17 +912,17 @@ public class TopicAction {
      * @param description The description search value.
      * @return This object.
      */
-    public TopicSearch setDescription(String description) {
+    public ChannelSearch setDescription(String description) {
       return setDescription(description, null);
     }
 
     /**
-     * Specify the topic description to be searched.
+     * Specify the channel description to be searched.
      * @param description The description search value.
      * @param matchType The match type.
      * @return This object.
      */
-    public TopicSearch setDescription(String description, Match matchType) {
+    public ChannelSearch setDescription(String description, Match matchType) {
       mDescription = new SingleValue(description, matchType);
       return this;
     }
@@ -969,11 +945,11 @@ public class TopicAction {
     }
 
     /**
-     * Set the search values of topic tags using exact match in each value.
+     * Set the search values of channel tags using exact match in each value.
      * @param tags
      * @return This object.
      */
-    public TopicSearch setTags(List<String> tags) {
+    public ChannelSearch setTags(List<String> tags) {
       mTags = new MultiValues(tags, null);
       return this;
     }
@@ -981,80 +957,26 @@ public class TopicAction {
 
   /**
    * @hide
-   * The topic search request protocol.
+   * Channel search attributes.
    */
-  public static class TopicSearchRequest extends TopicSearch {
-    @SerializedName("operator")
-    private Operator mOperator;
-    @SerializedName("offset")
-    private int mOffset;
-    @SerializedName("limit")
-    private int mLimit;
-    @SerializedName("type")
-    private ListType mType;
-
-    public TopicSearchRequest(Operator operator, TopicSearch attr, int offset,
-                               int limit, ListType type) {
-      if (attr == null)
-        throw new IllegalArgumentException("Search attribute cannot be null");
-      if ((mOperator = operator) == null)
-        throw new IllegalArgumentException("Operator cannot be null");
-      if ((mLimit = limit) == 0)
-        throw new IllegalArgumentException("Limit cannot be 0");
-      mOffset = offset;
-      mType = (null == type) ? ListType.global : type;
-      setTopicName(attr.getTopicName(), attr.getTopicNameMatch());
-      setDescription(attr.getDescription(), attr.getDescriptionMatch());
-      setTags(attr.getTags());
-    }
-
-    public TopicSearchRequest(Operator operator, TopicSearch attr, int offset, int limit) {
-      this(operator, attr, offset, limit, null);
-    }
-
-    public Operator getOperator() {
-      return mOperator;
-    }
-
-    public int getOffset() {
-      return mOffset;
-    }
-
-    public int getLimit() {
-      return mLimit;
-    }
-
-    public ListType getType() {
-      return mType;
-    }
-
-    public static TopicSearchRequest fromJson(String json) {
-      return GsonData.getGson().fromJson(json, TopicSearchRequest.class);
-    }
-  }
-
-  /**
-   * @hide
-   * Topic search attributes.
-   */
-  public static enum TopicAttr {
-    topicName,
+  public static enum ChannelAttr {
+    channelName,
     description,
   }
 
   /**
    * @hide
-   * Request of the topic query.
+   * Request of the channel query.
    */
-  public static class TopicQueryRequest extends JSONifiable {
+  public static class ChannelQueryRequest extends JSONifiable {
     @SerializedName("criteria")
-    private List<MMXAttribute<TopicAttr>> mCriteria = new ArrayList<MMXAttribute<TopicAttr>>();
+    private List<MMXAttribute<ChannelAttr>> mCriteria = new ArrayList<MMXAttribute<ChannelAttr>>();
     @SerializedName("offset")
     private int mOffset;
     @SerializedName("limit")
     private int mLimit;
 
-    public TopicQueryRequest(List<MMXAttribute<TopicAttr>> criteria,
+    public ChannelQueryRequest(List<MMXAttribute<ChannelAttr>> criteria,
                               int offset, int limit) {
       if (criteria == null || criteria.size() != 1) {
         throw new IllegalArgumentException("Criteria must have one search type.");
@@ -1064,7 +986,7 @@ public class TopicAction {
       mLimit = limit;
     }
 
-    public List<MMXAttribute<TopicAttr>> getCriteria() {
+    public List<MMXAttribute<ChannelAttr>> getCriteria() {
       return mCriteria;
     }
 
@@ -1076,25 +998,25 @@ public class TopicAction {
       return mOffset;
     }
 
-    public static TopicQueryRequest fromJson(String json) {
-      return GsonData.getGson().fromJson(json, TopicQueryRequest.class);
+    public static ChannelQueryRequest fromJson(String json) {
+      return GsonData.getGson().fromJson(json, ChannelQueryRequest.class);
     }
   }
 
   /**
    * @hide
-   * TopicInfo with subscription count.
+   * ChannelInfo with subscription count.
    */
-  public static class TopicInfoWithSubscriptionCount extends TopicInfo {
+  public static class ChannelInfoWithSubscriptionCount extends ChannelInfo {
     private int subscriptionCount;
     /**
      * @hide
      * @param userId
-     * @param topic
+     * @param channel
      * @param isCollection
      */
-    public TopicInfoWithSubscriptionCount(String userId, String topic, boolean isCollection) {
-      super(userId, topic, isCollection);
+    public ChannelInfoWithSubscriptionCount(String userId, String channel, boolean isCollection) {
+      super(userId, channel, isCollection);
     }
 
     /**
@@ -1105,27 +1027,27 @@ public class TopicAction {
       return subscriptionCount;
     }
 
-    public TopicInfoWithSubscriptionCount setSubscriptionCount(int subscriptionCount) {
+    public ChannelInfoWithSubscriptionCount setSubscriptionCount(int subscriptionCount) {
       this.subscriptionCount = subscriptionCount;
       return this;
     }
   }
 
   /**
-   * Response of the topic search.
+   * Response of the channel search.
    */
-  public static class TopicQueryResponse extends JSONifiable {
+  public static class ChannelQueryResponse extends JSONifiable {
     @SerializedName("total")
     private int mTotal;
     @SerializedName("results")
-    private List<TopicInfo> mResults;
+    private List<ChannelInfo> mResults;
 
     /**
      * @hide
      * @param total
      * @param results
      */
-    public TopicQueryResponse(int total, List<TopicInfo> results) {
+    public ChannelQueryResponse(int total, List<ChannelInfo> results) {
       mTotal = total;
       mResults = results;
     }
@@ -1142,7 +1064,7 @@ public class TopicAction {
      * Get the result set.
      * @return
      */
-    public List<TopicInfo> getResults() {
+    public List<ChannelInfo> getResults() {
       return mResults;
     }
 
@@ -1151,8 +1073,8 @@ public class TopicAction {
      * @param json
      * @return
      */
-    public static TopicQueryResponse fromJson(String json) {
-      return GsonData.getGson().fromJson(json, TopicQueryResponse.class);
+    public static ChannelQueryResponse fromJson(String json) {
+      return GsonData.getGson().fromJson(json, ChannelQueryResponse.class);
     }
   }
 
@@ -1285,19 +1207,19 @@ public class TopicAction {
 
   /**
    * @hide
-   * Request payload for fetching published items from a topic.
+   * Request payload for fetching published items from a channel.
    */
   public static class FetchRequest extends JSONifiable {
     @SerializedName("userId")
     private String mUserId;
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("options")
     private FetchOptions mOptions;
 
-    public FetchRequest(String userId, String topic, FetchOptions options) {
+    public FetchRequest(String userId, String channel, FetchOptions options) {
       mUserId = userId;
-      mTopic = topic;
+      mChannel = channel;
       mOptions = options;
     }
 
@@ -1305,8 +1227,8 @@ public class TopicAction {
       return mUserId;
     }
 
-    public String getTopic() {
-      return mTopic;
+    public String getChannel() {
+      return mChannel;
     }
 
     public FetchOptions getOptions() {
@@ -1363,8 +1285,8 @@ public class TopicAction {
   public static class FetchResponse extends JSONifiable {
     @SerializedName("userId")
     private String mUserId;
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("totalCount")
     private int mTotal;
     @SerializedName("items")
@@ -1373,13 +1295,13 @@ public class TopicAction {
     /**
      * @hide
      * @param userId
-     * @param topic
+     * @param channel
      * @param items
      */
-    public FetchResponse(String userId, String topic, int total,
+    public FetchResponse(String userId, String channel, int total,
         List<MMXPublishedItem> items) {
       mUserId = userId;
-      mTopic = topic;
+      mChannel = channel;
       mTotal = total;
       mItems = items;
     }
@@ -1388,8 +1310,8 @@ public class TopicAction {
       return mUserId;
     }
 
-    public String getTopic() {
-      return mTopic;
+    public String getChannel() {
+      return mChannel;
     }
 
     public List<MMXPublishedItem> getItems() {
@@ -1407,13 +1329,13 @@ public class TopicAction {
   
   /**
    * @hide
-   * Request to get all subscribers from a topic.
+   * Request to get all subscribers from a channel.
    */
   public static class SubscribersRequest extends JSONifiable {
     @SerializedName("userId")
     private String mUserId;
-    @SerializedName("topicName")
-    private String mTopic;
+    @SerializedName("channelName")
+    private String mChannel;
     @SerializedName("limit")
     private int mLimit;
     @SerializedName("offset")
@@ -1421,24 +1343,24 @@ public class TopicAction {
     
     /**
      * 
-     * @param userId Null for global topic, user ID for the user topic.
-     * @param topic The topic name.
+     * @param userId Null for global channel, user ID for the user channel.
+     * @param channel The channel name.
      * @param limit -1 for unlimited, or > 0.
      */
-    public SubscribersRequest(String userId, String topic, int limit) {
-      this(userId, topic, 0, limit);
+    public SubscribersRequest(String userId, String channel, int limit) {
+      this(userId, channel, 0, limit);
     }
 
     /**
      *
-     * @param userId Null for global topic, user ID for the user topic.
-     * @param topic The topic name.
+     * @param userId Null for global channel, user ID for the user channel.
+     * @param channel The channel name.
      * @param offset
      * @param limit -1 for unlimited, or > 0.
      */
-    public SubscribersRequest(String userId, String topic, int offset, int limit) {
+    public SubscribersRequest(String userId, String channel, int offset, int limit) {
       mUserId = userId;
-      mTopic = topic;
+      mChannel = channel;
       this.mOffset = offset;
       mLimit = limit;
     }
@@ -1447,8 +1369,8 @@ public class TopicAction {
       return mUserId;
     }
     
-    public String getTopic() {
-      return mTopic;
+    public String getChannel() {
+      return mChannel;
     }
     
     public int getLimit() {
@@ -1470,7 +1392,7 @@ public class TopicAction {
   
   /**
    * @hide
-   * Response of getting all subscribers to a topic.
+   * Response of getting all subscribers to a channel.
    */
   public static class SubscribersResponse extends MMXStatus {
     @SerializedName("subscribers")

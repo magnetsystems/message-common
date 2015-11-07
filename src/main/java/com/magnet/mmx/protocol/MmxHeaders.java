@@ -26,11 +26,12 @@ public class MmxHeaders extends Hashtable<String, Object> {
   private static final long serialVersionUID = 9047305151889919321L;
   /**
    * A special header used by MMX SDK to specify the sender with display name.
+   * The value must be MMXid.
    */
   public final static String FROM = "From";
   /**
    * A special header used by MMX SDK to specify the recipient(s) with display
-   * name(s).
+   * name(s).  The value must be MMXid[].
    */
   public final static String TO = "To";
 
@@ -51,9 +52,10 @@ public class MmxHeaders extends Hashtable<String, Object> {
   
   /**
    * A convenient method to set or remove a header with any JSONifiable value.
-   * This is mainly used for mmxmeta stanza.
+   * This is mainly used for mmxmeta stanza.  If <code>value</code> is null,
+   * the header will be removed.
    * @param key A key name.
-   * @param value Any JSONifiable object.
+   * @param value Any JSONifiable object, or null.
    * @return
    */
   public MmxHeaders setHeader(String key, Object value) {
@@ -81,5 +83,25 @@ public class MmxHeaders extends Hashtable<String, Object> {
       return defVal;
     else
       return value;
+  }
+  
+  /**
+   * Set the TO header with the MMX ID's of recipients.  It is equivalent to
+   * {@link #setHeader(String, Object)} with {@link #TO}.
+   * @param xids The recipients' MMX ID's, or null
+   * @return
+   */
+  public MmxHeaders setTo(MMXid[] xids) {
+    return setHeader(TO, xids);
+  }
+  
+  /**
+   * Set the FROM header with the MMX ID of the sender.  It is equivalent to
+   * {@link #setHeader(String, Object)} with {@link #FROM}.
+   * @param xid The sender MMX ID.
+   * @return
+   */
+  public MmxHeaders setFrom(MMXid xid) {
+    return setHeader(FROM, xid);
   }
 }

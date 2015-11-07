@@ -24,6 +24,7 @@ import java.io.Serializable;
  * The topic options.  If no options are specified, the topic is defaulted to
  * authorized access (owner or subscribers), published by anyone, one 
  * persistent published item and subscription is enabled.
+ * TODO: Review the definition of PublisherType after roles are introduced.
  */
 public class MMXTopicOptions implements Serializable {
   private static final long serialVersionUID = 5092103177218064923L;
