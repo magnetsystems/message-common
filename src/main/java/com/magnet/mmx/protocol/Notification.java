@@ -71,4 +71,8 @@ public class Notification {
     mBadge = badge;
     return this;
   }
+  
+  public static String getType() {
+    return Constants.PingPongCommand.notify.toString();
+  }
 }

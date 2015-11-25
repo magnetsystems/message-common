@@ -37,11 +37,21 @@ public class PushMessage {
     /**
      * Just wake up the application.
      */
-    WAKEUP,
+    WAKEUP("w"),
     /**
      * One client pushes data to another client.
      */
-    PUSH,
+    PUSH("p");
+
+    private String mCode;
+
+    private Action(String code) {
+      mCode = code;
+    }
+
+    public String getCode() {
+      return mCode;
+    }
   }
   
   /**
@@ -75,11 +85,16 @@ public class PushMessage {
   }
   
   /**
-   * Get the payload object.
+   * Get the payload object.  It is always a GCMPayload
    * @return
    */
   public Object getPayload() {
     return mPayload;
+  }
+
+  @Override
+  public String toString() {
+    return "{action="+mAction+", type="+mType+", data={"+mPayload+"}}";
   }
 
   /**
@@ -100,7 +115,7 @@ public class PushMessage {
                                 throws InvalidMessageException {
     StringBuilder sb = new StringBuilder();
     sb.append("mmx:")
-      .append((action==Action.WAKEUP) ? 'w' : 'p');
+      .append(action.getCode());
     if (type != null) {
       sb.append(':')
         .append(type);
@@ -116,10 +131,11 @@ public class PushMessage {
   }
   
   /**
-   * Decode an MMX push message into a payload type and payload object.  For MMX
-   * built-in payload (e.g. ping/pong), use MMXTypeMapper.
+   * Decode an MMX push message into a payload type and payload object.  Current
+   * implementation is to have payload in GCMPayload class.  In the future, the
+   * payload can have different types using the MMXTypeMapper for mapping.
    * @param pushMsg The encoded push message string.
-   * @param mapper Mapper from type to class.
+   * @param mapper Not used, but it maps a type to a class.
    * @return A PushMessage.
    * @throws InvalidMessageException A malformed push message.
    * @throws UnknownTypeException Cannot find a class for the type.
@@ -135,18 +151,13 @@ public class PushMessage {
       }
       Object payload = null;
       String type = null;
-      Action action = (tokens[1].charAt(0) == 'w') ? Action.WAKEUP : Action.PUSH;
-      if (tokens.length > 3) {
-        type = tokens[3];
-        Class<?> clz = mapper.getClassByType(type);
-        if (clz == null) {
-          throw new UnknownTypeException("No class found for "+type);
-        } else if (clz != Void.class) {
-          payload = GsonData.getGson().fromJson(reader, clz);
-        }
-      } else {
-          payload = GsonData.getGson().fromJson(reader, GCMPayload.class);
+      Action action = tokens[1].equalsIgnoreCase(Action.WAKEUP.getCode()) ?
+          Action.WAKEUP : Action.PUSH;
+      if (tokens.length >= 3 && !tokens[2].isEmpty()) {
+        type = tokens[2];
       }
+      // Always to use GCMPayload class.
+      payload = GsonData.getGson().fromJson(reader, GCMPayload.class);
       return new PushMessage(action, type, payload);
     } catch (InvalidMessageException e) {
       throw e;

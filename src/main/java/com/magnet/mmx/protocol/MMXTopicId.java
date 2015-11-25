@@ -34,7 +34,20 @@ public class MMXTopicId implements MMXTopic {
   protected String mTopic;
   @SerializedName("userId")
   protected String mEscUserId; // null or XEP-0106 conformed user ID.
-  
+
+  /**
+   * @hide
+   * Constructor to convert MMXTopic into MMXTopicId
+   * @param topic
+   */
+  public MMXTopicId(MMXTopic topic) {
+    if (topic == null)
+      throw new IllegalArgumentException("topic cannot be null");
+    mUserId = topic.getUserId();
+    mEscUserId = Utils.escapeNode(mUserId);
+    mTopic = topic.getName();
+  }
+
   /**
    * @hide
    * Constructor for a global topic.  The topic name is case insensitive.
@@ -173,5 +186,17 @@ public class MMXTopicId implements MMXTopic {
    */
   public static MMXTopicId fromJson(String json) {
     return GsonData.getGson().fromJson(json, MMXTopicId.class);
+  }
+
+  /**
+   * Transform this object to MMXChannelId.
+   * @return
+   */
+  public MMXChannelId toMMXChannelId() {
+    MMXChannelId channelId = new MMXChannelId();
+    channelId.mChannel = this.mTopic;
+    channelId.mEscUserId = this.mEscUserId;
+    channelId.mUserId = this.mUserId;
+    return channelId;
   }
 }

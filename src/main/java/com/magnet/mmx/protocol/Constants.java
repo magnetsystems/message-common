@@ -224,7 +224,11 @@ public class Constants {
     /**
      * Wakeup the device and ask it to phone home
      */
-    retrieve
+    retrieve,
+    /**
+     * Pubsub wakeup with the PubSubNotification payload.
+     */
+    pubsub,
   }
 
   /**

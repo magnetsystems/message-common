@@ -34,7 +34,10 @@ public class MmxHeaders extends Hashtable<String, Object> {
    * name(s).  The value must be MMXid[].
    */
   public final static String TO = "To";
-
+  /**
+   * Do not send the ack signal messages when server receives the message.
+   */
+  public final static String NO_ACK = "NoAck";
   /**
    * A default constructor.
    */
@@ -103,5 +106,15 @@ public class MmxHeaders extends Hashtable<String, Object> {
    */
   public MmxHeaders setFrom(MMXid xid) {
     return setHeader(FROM, xid);
+  }
+
+  /**
+   * Not to send the ack signal messages.  REST API should disable the ack
+   * signaling messages for unicast and multicast messages.
+   * @param enable
+   * @return
+   */
+  public MmxHeaders setNoAck(boolean noAck) {
+    return setHeader(NO_ACK, noAck ? Boolean.TRUE : Boolean.FALSE);
   }
 }

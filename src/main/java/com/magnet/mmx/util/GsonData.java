@@ -27,6 +27,7 @@ import com.google.gson.JsonSerializer;
 
 import java.lang.reflect.Type;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * This class customizes the Date to be ISO-8601 format.  A typical usage is:
@@ -86,5 +87,16 @@ public class GsonData {
       }
       return date;
     }
+  }
+
+  /**
+   * Convert a Map into an object of class <code>clz</code>.  Note, this method
+   * is just a convenient utility and not designed to handle large object.
+   * @param map A Map object.
+   * @param clz The class of the custom object.
+   * @return An object of a specified class.
+   */
+  public static <T> T fromMap(Map<String, ? super Object> map, Class<T> clz) {
+    return (map == null) ? null : sGson.fromJson(sGson.toJson(map), clz);
   }
 }

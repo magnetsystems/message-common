@@ -18,9 +18,31 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Map;
 
-
-
+/**
+ * GCM push payload from client to client.  The mmx dictionary contains at least
+ * {@link #KEY_CALLBACK_URL}, {@link #KEY_CUSTOM_CONTENT}, {@link #KEY_PUSH_ID},
+ * {@link #KEY_TYPE} properties.  
+ * 
+ * TODO: this class should be renamed to PushPayload.
+ */
 public class GCMPayload {
+  /**
+   * MMX dictionary key for the unique push ID.
+   */
+  public final static String KEY_PUSH_ID = Constants.PAYLOAD_ID_KEY;
+  /**
+   * MMX dictionary key for the callback URL.
+   */
+  public final static String KEY_CALLBACK_URL = Constants.PAYLOAD_CALLBACK_URL_KEY;
+  /**
+   * MMX dictionary key for the custom content type.
+   */
+  public final static String KEY_TYPE = Constants.PAYLOAD_TYPE_KEY;
+  /**
+   * MMX dictionary key for the custom content.
+   */
+  public final static String KEY_CUSTOM_CONTENT = Constants.PAYLOAD_CUSTOM_KEY;
+
   @SerializedName(Constants.PAYLOAD_PUSH_TITLE)
   private String title;
   @SerializedName(Constants.PAYLOAD_PUSH_BODY)
@@ -70,5 +92,35 @@ public class GCMPayload {
 
   public void setMmx(Map<String, ? super Object> mmx) {
     this.mmx = mmx;
+  }
+  
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    if (title != null) {
+      if (sb.length() > 0) sb.append(", ");
+      sb.append(Constants.PAYLOAD_PUSH_TITLE).append("=\"").append(title).append('"');
+    }
+    if (body != null) {
+      if (sb.length() > 0) sb.append(", ");
+      sb.append(Constants.PAYLOAD_PUSH_BODY).append("=\"").append(body).append('"');
+    }
+    if (icon != null) {
+      if (sb.length() > 0) sb.append(", ");
+      sb.append(Constants.PAYLOAD_PUSH_ICON).append("=\"").append(icon).append('"');
+    }
+    if (sound != null) {
+      if (sb.length() > 0) sb.append(", ");
+      sb.append(Constants.PAYLOAD_PUSH_SOUND).append("=\"").append(sound).append('"');
+    }
+    if (mmx != null) {
+      if (sb.length() > 0) sb.append(", ");
+      sb.append(Constants.PAYLOAD_MMX_KEY).append('=').append(mmx);
+    }
+    return sb.toString();
+  }
+  
+  public static String getType() {
+    return "gcmpayload";
   }
 }
