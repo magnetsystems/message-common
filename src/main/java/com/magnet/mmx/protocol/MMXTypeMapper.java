@@ -33,10 +33,9 @@ import com.magnet.mmx.util.TypeMapper;
 public class MMXTypeMapper extends TypeMapper {
   private final static Map<String, String> sMap = new HashMap<String, String>() {{
 //    put(Constants.PingPongCommand.ping.toString(), PingPong.class.getName());
-    put(GCMPayload.getType(), GCMPayload.class.getName());
+//    put(Constants.PingPongCommand.pong.toString(), PingPong.class.getName());
+//    put(Constants.PingPongCommand.pingpong.toString(), PingPong.class.getName());
     put(Constants.PingPongCommand.ping.toString(), GCMPayload.class.getName());
-    put(Constants.PingPongCommand.pong.toString(), PingPong.class.getName());
-    put(Constants.PingPongCommand.pingpong.toString(), PingPong.class.getName());
     put(Notification.getType(), Notification.class.getName());
     put(Constants.PingPongCommand.retrieve.toString(), GCMPayload.class.getName());
     put(MMXError.getType(), MMXError.class.getName());
