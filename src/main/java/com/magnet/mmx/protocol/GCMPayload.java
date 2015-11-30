@@ -51,6 +51,8 @@ public class GCMPayload {
   private String icon;
   @SerializedName(Constants.PAYLOAD_PUSH_SOUND)
   private String sound;
+  @SerializedName(Constants.PAYLOAD_PUSH_BADGE)
+  private Integer badge;
   @SerializedName(Constants.PAYLOAD_MMX_KEY)
   private Map<String, ? super Object> mmx;
 
@@ -86,6 +88,14 @@ public class GCMPayload {
     this.sound = sound;
   }
 
+  public Integer getBadge() {
+    return badge;
+  }
+
+  public void setBadge(Integer badge) {
+    this.badge = badge;
+  }
+
   public Map<String, ? super Object> getMmx() {
     return mmx;
   }
@@ -112,6 +122,10 @@ public class GCMPayload {
     if (sound != null) {
       if (sb.length() > 0) sb.append(", ");
       sb.append(Constants.PAYLOAD_PUSH_SOUND).append("=\"").append(sound).append('"');
+    }
+    if (badge != null) {
+      if (sb.length() > 0) sb.append(", ");
+      sb.append(Constants.PAYLOAD_PUSH_BADGE).append('=').append(badge);
     }
     if (mmx != null) {
       if (sb.length() > 0) sb.append(", ");
