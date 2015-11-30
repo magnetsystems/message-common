@@ -22,8 +22,8 @@ import com.google.gson.annotations.SerializedName;
  * The custom payload for PubSub wakeup.
  */
 public class PubSubNotification {
-  @SerializedName("title")
-  private String mTitle;
+  @SerializedName("text")
+  private String mText;
   @SerializedName("channel")
   private MMXChannelId mChannel;
   @SerializedName("publishDate")
@@ -34,12 +34,12 @@ public class PubSubNotification {
    * Constructor with a high level Channel object.
    * @param channel The channel name.
    * @param pubDate The oldest publish date of the new items.
-   * @param title Optional text message, or null
+   * @param text Optional text message, or null
    */
-  public PubSubNotification(MMXChannelId channel, Date pubDate, String title) {
+  public PubSubNotification(MMXChannelId channel, Date pubDate, String text) {
     mChannel = channel;
     mPublishDate = pubDate;
-    mTitle = title;
+    mText = text;
   }
 
   /**
@@ -50,18 +50,18 @@ public class PubSubNotification {
    * @param pubDate The oldest publish date of the new items
    * @param title Optional text message, or null
    */
-  public PubSubNotification(MMXTopicId topic, Date pubDate, String title) {
+  public PubSubNotification(MMXTopicId topic, Date pubDate, String text) {
     mChannel = topic.toMMXChannelId();
     mPublishDate = pubDate;
-    mTitle = title;
+    mText = text;
   }
 
   /**
    * Get an optional text message for the notification.
    * @return Text message, or null.
    */
-  public String getTitle() {
-    return mTitle;
+  public String getText() {
+    return mText;
   }
   
   /**

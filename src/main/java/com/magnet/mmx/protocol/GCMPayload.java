@@ -22,8 +22,6 @@ import java.util.Map;
  * GCM push payload from client to client.  The mmx dictionary contains at least
  * {@link #KEY_CALLBACK_URL}, {@link #KEY_CUSTOM_CONTENT}, {@link #KEY_PUSH_ID},
  * {@link #KEY_TYPE} properties.  
- * 
- * TODO: this class should be renamed to PushPayload.
  */
 public class GCMPayload {
   /**
