@@ -16,6 +16,7 @@
 package com.magnet.mmx.protocol;
 
 import java.io.BufferedReader;
+import java.io.Serializable;
 import java.io.StringReader;
 
 import com.magnet.mmx.util.GsonData;
@@ -29,7 +30,16 @@ import com.magnet.mmx.util.UnknownTypeException;
  * decode a push message to a payload.  A built-in ping-pong message can test
  * if a device is ready to receive a push message for debug purpose.
  */
-public class PushMessage {
+public class PushMessage implements Serializable {
+  private static final long serialVersionUID = 877180761025820867L;
+  /**
+   * Maximum push message size.  It is the minimum of APNS and GCM max sizes.
+   */
+  public final static int MAX_SIZE = 2048;
+  private Action mAction;
+  private String mType;
+  private Object mPayload;
+
   /**
    * The action what the recipient should do when a push message is received.
    */
@@ -53,14 +63,6 @@ public class PushMessage {
       return mCode;
     }
   }
-  
-  /**
-   * Maximum push message size.  It is the minimum of APNS and GCM max sizes.
-   */
-  public final static int MAX_SIZE = 2048;
-  private Action mAction;
-  private String mType;
-  private Object mPayload;
 
   PushMessage(Action action, String type, Object payload) {
     mAction = action;
@@ -70,14 +72,14 @@ public class PushMessage {
   
   /**
    * Get the action code for a received push message.
-   * @return
+   * @return A wakeup (silent notification) or push (non-silent notification).
    */
   public Action getAction() {
     return mAction;
   }
   
   /**
-   * Get the payload type.
+   * Get the push payload type.
    * @return
    */
   public String getType() {
@@ -85,7 +87,7 @@ public class PushMessage {
   }
   
   /**
-   * Get the payload object.  It is always a GCMPayload
+   * Get the payload object.  It is always a type of GCMPayload.
    * @return
    */
   public Object getPayload() {

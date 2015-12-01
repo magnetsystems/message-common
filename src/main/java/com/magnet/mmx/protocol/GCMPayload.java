@@ -16,6 +16,7 @@ package com.magnet.mmx.protocol;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -23,7 +24,8 @@ import java.util.Map;
  * {@link #KEY_CALLBACK_URL}, {@link #KEY_CUSTOM_CONTENT}, {@link #KEY_PUSH_ID},
  * {@link #KEY_TYPE} properties.  
  */
-public class GCMPayload {
+public class GCMPayload implements Serializable {
+  private static final long serialVersionUID = 1678052400350808468L;
   /**
    * MMX dictionary key for the unique push ID.
    */
