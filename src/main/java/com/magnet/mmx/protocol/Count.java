@@ -40,4 +40,9 @@ public class Count {
   public void setUnsent(int unsent) {
     this.unsent = unsent;
   }
+
+  @Override
+  public String toString() {
+    return "[requested="+requested+", sent="+sent+", unsent="+unsent+"]";
+  }
 }
