@@ -64,7 +64,10 @@ public class PushMessage implements Serializable {
     }
   }
 
-  PushMessage(Action action, String type, Object payload) {
+  /**
+   * @hide
+   */
+  public PushMessage(Action action, String type, Object payload) {
     mAction = action;
     mType = type;
     mPayload = payload;
