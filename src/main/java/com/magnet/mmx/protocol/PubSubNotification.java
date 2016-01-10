@@ -19,19 +19,23 @@ import java.util.Date;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * The custom payload for PubSub wakeup.
+ * The payload for PubSub wakeup (silent notifification) or push notification.
  */
 public class PubSubNotification {
   @SerializedName("text")
-  private String mText;
+  private final String mText;
   @SerializedName("channel")
-  private MMXChannelId mChannel;
+  private final MMXChannelId mChannel;
   @SerializedName("publishDate")
-  private Date mPublishDate;
+  private final Date mPublishDate;
+  @SerializedName("title")
+  private final String mTitle;
+  @SerializedName("body")
+  private final String mBody;
 
   /**
    * @hide
-   * Constructor with a high level Channel object.
+   * Constructor with a Channel object for wake-up (silent notification.)
    * @param channel The channel name.
    * @param pubDate The oldest publish date of the new items.
    * @param text Optional text message, or null
@@ -40,30 +44,77 @@ public class PubSubNotification {
     mChannel = channel;
     mPublishDate = pubDate;
     mText = text;
+    mTitle = null;
+    mBody = null;
   }
 
   /**
    * @hide
-   * Constructor with a lower Topic object.  The Topic object will be converted
-   * to Channel object.
-   * @param topic The topic name
-   * @param pubDate The oldest publish date of the new items
-   * @param title Optional text message, or null
+   * Constructor with a Channel object for push notification.  The optional text
+   * will be set to the <code>title</code> for backward compatibility.
+   * @param channel The channel name.
+   * @param pubDate The oldest publish date of the new items.
+   * @param title A non-null title for push notification.
+   * @param body An optional body for push notification.
    */
-  public PubSubNotification(MMXTopicId topic, Date pubDate, String text) {
-    mChannel = topic.toMMXChannelId();
+  public PubSubNotification(MMXChannelId channel, Date pubDate, String title, String body) {
+    mChannel = channel;
     mPublishDate = pubDate;
-    mText = text;
+    mText = title;
+    mTitle = title;
+    mBody = body;
   }
 
   /**
-   * Get an optional text message for the notification.
+   * @hide
+   * Constructor with a Topic object for wake-up (silent notification.)
+   * The Topic object will be converted to Channel object.
+   * @param topic The topic name.
+   * @param pubDate The oldest publish date of the new items.
+   * @param text Optional text message, or null.
+   */
+  public PubSubNotification(MMXTopicId topic, Date pubDate, String text) {
+    this(topic.toMMXChannelId(), pubDate, text);
+  }
+
+  /**
+   * @hide
+   * Constructor with a lower Topic object for push notification.
+   * @param topic The topic name
+   * @param pubDate
+   * @param title
+   * @param body
+   */
+  public PubSubNotification(MMXTopicId topic, Date pubDate, String title, String body) {
+    this(topic.toMMXChannelId(), pubDate, title, body);
+  }
+
+  /**
+   * Get a text message for the wake-up (silent) notification.
    * @return Text message, or null.
    */
   public String getText() {
     return mText;
   }
-  
+
+  /**
+   * Get the title for the push notification.  The title is only available for
+   * push notification; otherwise, it will be null.
+   * @return Title text, or null.
+   */
+  public String getTitle() {
+    return mTitle;
+  }
+
+  /**
+   * Get the body for the push notification.  The optional body is only
+   * available for push notification; otherwise, it will be null.
+   * @return Body text, or null.
+   */
+  public String getBody() {
+    return mBody;
+  }
+
   /**
    * Get the channel for this notification.
    * @return The channel which new items are published to.
@@ -81,7 +132,7 @@ public class PubSubNotification {
   }
 
   /**
-   * Get the type of this notification.
+   * Get the type of this payload.
    * @return Always "pubsub".
    */
   public static String getType() {
