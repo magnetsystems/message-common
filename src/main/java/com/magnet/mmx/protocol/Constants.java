@@ -61,11 +61,11 @@ public class Constants {
   /**
    * The current protocol major version number.
    */
-  public final static int MMX_VERSION_MAJOR = 1;
+  public final static int MMX_VERSION_MAJOR = 2;
   /**
    * The current protocol minor version number.
    */
-  public final static int MMX_VERSION_MINOR = 6;
+  public final static int MMX_VERSION_MINOR = 1;
   /**
    * The elements for MMX.
    */
@@ -224,7 +224,11 @@ public class Constants {
     /**
      * Wakeup the device and ask it to phone home
      */
-    retrieve
+    retrieve,
+    /**
+     * Pubsub wakeup with the PubSubNotification payload.
+     */
+    pubsub,
   }
 
   /**
@@ -418,6 +422,10 @@ public class Constants {
    */
   public static final String PAYLOAD_PUSH_SOUND = "sound";
 
+  /**
+   * Name of the badge
+   */
+  public static final String PAYLOAD_PUSH_BADGE = "badge";
   //constants related to mmx dictionary in push/ping payloads
   /**
    * Name of the mmx dictionary element
@@ -464,4 +472,8 @@ public class Constants {
   public static final String SERVER_ACK_KEY = "serverack";
   public static final String BEGIN_ACK_KEY = "beginack";
   public static final String END_ACK_KEY = "endack";
+  /**
+   * Flag indicated if MMX is integrated with MMS.
+   */
+  public static final boolean MMS_INTEGRATION_ENABLED = true;
 }

@@ -23,18 +23,18 @@ import com.google.gson.annotations.SerializedName;
 public class Notification {
   @SerializedName("title")
   private String mTitle;
-  @SerializedName("text")
-  private String mText;
+  @SerializedName("body")
+  private String mBody;
   @SerializedName("icon")
   private String mIconResName;
   @SerializedName("sound")
   private String mSound;
   @SerializedName("badge")
-  private int mBadge;
+  private Integer mBadge;
   
-  public Notification(String title, String text) {
+  public Notification(String title, String body) {
     mTitle = title;
-    mText = text;
+    mBody = body;
   }
   public String getTitle() {
     return mTitle;
@@ -43,11 +43,11 @@ public class Notification {
     mTitle = title;
     return this;
   }
-  public String getText() {
-    return mText;
+  public String getBody() {
+    return mBody;
   }
-  public Notification setText(String text) {
-    mText = text;
+  public Notification setBody(String body) {
+    mBody = body;
     return this;
   }
   public String getIconResName() {
@@ -64,11 +64,15 @@ public class Notification {
     mSound = sound;
     return this;
   }
-  public int getBadge() {
+  public Integer getBadge() {
     return mBadge;
   }
-  public Notification setBadge(int badge) {
+  public Notification setBadge(Integer badge) {
     mBadge = badge;
     return this;
+  }
+  
+  public static String getType() {
+    return Constants.PingPongCommand.notify.toString();
   }
 }

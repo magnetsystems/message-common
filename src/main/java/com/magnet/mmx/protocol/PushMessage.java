@@ -16,6 +16,7 @@
 package com.magnet.mmx.protocol;
 
 import java.io.BufferedReader;
+import java.io.Serializable;
 import java.io.StringReader;
 
 import com.magnet.mmx.util.GsonData;
@@ -29,21 +30,8 @@ import com.magnet.mmx.util.UnknownTypeException;
  * decode a push message to a payload.  A built-in ping-pong message can test
  * if a device is ready to receive a push message for debug purpose.
  */
-public class PushMessage {
-  /**
-   * The action what the recipient should do when a push message is received.
-   */
-  public static enum Action {
-    /**
-     * Just wake up the application.
-     */
-    WAKEUP,
-    /**
-     * One client pushes data to another client.
-     */
-    PUSH,
-  }
-  
+public class PushMessage implements Serializable {
+  private static final long serialVersionUID = 877180761025820867L;
   /**
    * Maximum push message size.  It is the minimum of APNS and GCM max sizes.
    */
@@ -52,7 +40,34 @@ public class PushMessage {
   private String mType;
   private Object mPayload;
 
-  PushMessage(Action action, String type, Object payload) {
+  /**
+   * The action what the recipient should do when a push message is received.
+   */
+  public static enum Action {
+    /**
+     * Just wake up the application.
+     */
+    WAKEUP("w"),
+    /**
+     * One client pushes data to another client.
+     */
+    PUSH("p");
+
+    private String mCode;
+
+    private Action(String code) {
+      mCode = code;
+    }
+
+    public String getCode() {
+      return mCode;
+    }
+  }
+
+  /**
+   * @hide
+   */
+  public PushMessage(Action action, String type, Object payload) {
     mAction = action;
     mType = type;
     mPayload = payload;
@@ -60,14 +75,14 @@ public class PushMessage {
   
   /**
    * Get the action code for a received push message.
-   * @return
+   * @return A wakeup (silent notification) or push (non-silent notification).
    */
   public Action getAction() {
     return mAction;
   }
   
   /**
-   * Get the payload type.
+   * Get the push payload type.
    * @return
    */
   public String getType() {
@@ -75,11 +90,16 @@ public class PushMessage {
   }
   
   /**
-   * Get the payload object.
+   * Get the payload object.  It is always a type of GCMPayload.
    * @return
    */
   public Object getPayload() {
     return mPayload;
+  }
+
+  @Override
+  public String toString() {
+    return "{action="+mAction+", type="+mType+", data={"+mPayload+"}}";
   }
 
   /**
@@ -100,7 +120,7 @@ public class PushMessage {
                                 throws InvalidMessageException {
     StringBuilder sb = new StringBuilder();
     sb.append("mmx:")
-      .append((action==Action.WAKEUP) ? 'w' : 'p');
+      .append(action.getCode());
     if (type != null) {
       sb.append(':')
         .append(type);
@@ -116,10 +136,11 @@ public class PushMessage {
   }
   
   /**
-   * Decode an MMX push message into a payload type and payload object.  For MMX
-   * built-in payload (e.g. ping/pong), use MMXTypeMapper.
+   * Decode an MMX push message into a payload type and payload object.  Current
+   * implementation is to have payload in GCMPayload class.  In the future, the
+   * payload can have different types using the MMXTypeMapper for mapping.
    * @param pushMsg The encoded push message string.
-   * @param mapper Mapper from type to class.
+   * @param mapper Not used, but it maps a type to a class.
    * @return A PushMessage.
    * @throws InvalidMessageException A malformed push message.
    * @throws UnknownTypeException Cannot find a class for the type.
@@ -135,18 +156,13 @@ public class PushMessage {
       }
       Object payload = null;
       String type = null;
-      Action action = (tokens[1].charAt(0) == 'w') ? Action.WAKEUP : Action.PUSH;
-      if (tokens.length > 3) {
-        type = tokens[3];
-        Class<?> clz = mapper.getClassByType(type);
-        if (clz == null) {
-          throw new UnknownTypeException("No class found for "+type);
-        } else if (clz != Void.class) {
-          payload = GsonData.getGson().fromJson(reader, clz);
-        }
-      } else {
-          payload = GsonData.getGson().fromJson(reader, GCMPayload.class);
+      Action action = tokens[1].equalsIgnoreCase(Action.WAKEUP.getCode()) ?
+          Action.WAKEUP : Action.PUSH;
+      if (tokens.length >= 3 && !tokens[2].isEmpty()) {
+        type = tokens[2];
       }
+      // Always to use GCMPayload class.
+      payload = GsonData.getGson().fromJson(reader, GCMPayload.class);
       return new PushMessage(action, type, payload);
     } catch (InvalidMessageException e) {
       throw e;

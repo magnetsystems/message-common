@@ -52,21 +52,11 @@ public class MMXid implements Serializable {
 //  }
 
   /**
-   * Construct an identifier for a user.  The <code>userId</code> must be
-   * in the un-escaped format and it will be converted to lower case.
+   * Construct an identifier for a user or end-point with an optional display
+   * name.  The <code>userId</code> must be be in the un-escaped format and it
+   * will be converted to lower case.
    * @param userId A non-null user ID.
-   * @param displayName A display name or null.
-   */
-  public MMXid(String userId, String displayName) {
-    this(userId, null, displayName);
-  }
-
-  /**
-   * Construct an identifier for an end-point with an optional display name.
-   * The <code>userId</code> must be be in the un-escaped format and it will be
-   * converted to lower case.
-   * @param userId A non-null user ID.
-   * @param deviceId A device ID.
+   * @param deviceId A device ID or null.
    * @param displayName A display name or null.
    */
   public MMXid(String userId, String deviceId, String displayName) {

@@ -26,14 +26,16 @@ import com.magnet.mmx.util.JSONifiable;
  * the subscriptions.
  */
 public class SendLastPublishedItems extends JSONifiable {
+  @SerializedName("topic")
+  private MMXTopicId mTopic;
   @SerializedName("since")
   private Date mSince;
   @SerializedName("maxItems")
   private int mMaxItems;
-  
+
   /**
-   * Constructor to request for published items of all topics since a given 
-   * date/time.
+   * Constructor to request for published items of all subscribed topics
+   * since a given date/time.
    * @param maxItems -1 for all items; otherwise a positive number.
    * @param since A datetime.
    */
@@ -42,10 +44,27 @@ public class SendLastPublishedItems extends JSONifiable {
     mMaxItems = maxItems;
   }
 
+  /**
+   * Constructor to request for published items of a subscribed topic
+   * since a given date/time.
+   * @param topic A subscribed topic.
+   * @param maxItems -1 for all items; otherwise a positive number.
+   * @param since A datetime.
+   */
+  public SendLastPublishedItems(MMXTopicId topic, int maxItems, Date since) {
+    mTopic = topic;
+    mSince = since;
+    mMaxItems = maxItems;
+  }
+
+  public MMXTopicId getTopic() {
+    return mTopic;
+  }
+
   public Date getSince() {
     return mSince;
   }
-  
+
   public int getMaxItems() {
     return mMaxItems;
   }

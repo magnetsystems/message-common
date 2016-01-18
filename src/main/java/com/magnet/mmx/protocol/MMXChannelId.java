@@ -34,6 +34,10 @@ public class MMXChannelId implements MMXChannel {
   @SerializedName("userId")
   protected String mEscUserId; // null or XEP-0106 conformed user ID.
 
+  MMXChannelId() {
+    // Used by MMXTopicId as a transformation.
+  }
+
   /**
    * @hide
    * Constructor for a global channel.  The channel name is case insensitive.
