@@ -1,4 +1,4 @@
-/*   Copyright (c) 2015 Magnet Systems, Inc.
+/*   Copyright (c) 2015-2016 Magnet Systems, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
@@ -42,7 +43,7 @@ public class Utils {
   public final static int FLAG_INSERT_WILDCARD = 0x4;
 
   public static final String ISO_8601_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-  
+
   public static final String QUOTE_ENCODE = "&quot;";
   public static final String APOS_ENCODE = "&apos;";
   public static final String AMP_ENCODE = "&amp;";
@@ -54,7 +55,7 @@ public class Utils {
    * number will have non-digits stripped, can be reversed with wild card '%'
    * for searching.
    * @param phoneNumber A phone number.
-   * @param flags Combination of {@link #FLAG_REVERSE}, 
+   * @param flags Combination of {@link #FLAG_REVERSE},
    *          {@link #FLAG_APPEND_WILDCARD} and {@link #FLAG_INSERT_WILDCARD}
    * @return A normalized phone number.
    */
@@ -78,7 +79,33 @@ public class Utils {
     }
     return sb.toString();
   }
-  
+
+  /**
+   * Get the value of a non-public member.
+   * @param obj An object containing the field to be accessed.
+   * @param fieldName The field name in the class.
+   * @return
+   * @throws NoSuchFieldException
+   * @throws SecurityException
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   */
+  public static Object getFieldValue(Object obj, String fieldName)
+      throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+              IllegalAccessException {
+    boolean accessible;
+    Class<?> clz = obj.getClass();
+    Field field = clz.getDeclaredField(fieldName);
+    if (!(accessible = field.isAccessible())) {
+      field.setAccessible(true);
+    }
+    Object value = field.get(obj);
+    if (!accessible) {
+      field.setAccessible(false);
+    }
+    return value;
+  }
+
   /**
    * Get a non-public (i.e. declared) static method from a class.
    * @param clz The class.
@@ -101,7 +128,7 @@ public class Utils {
       return clz.getDeclaredMethod(methodName, paramClasses);
     }
   }
-  
+
   /**
    * Get a non-public (i.e. declared) method from an object.
    * @param obj The object to be used.
@@ -124,7 +151,7 @@ public class Utils {
       return obj.getClass().getDeclaredMethod(methodName, paramClasses);
     }
   }
-  
+
   /**
    * Get a non-public (i.e. declared) static method from a class.
    * @param clz The class.
@@ -142,7 +169,7 @@ public class Utils {
       return clz.getDeclaredMethod(methodName, paramClasses);
     }
   }
-  
+
   /**
    * Get a non-public (i.e. declared) method from an object.
    * @param obj The object to be used.
@@ -160,10 +187,10 @@ public class Utils {
       return obj.getClass().getDeclaredMethod(methodName, paramClasses);
     }
   }
-  
+
   /**
    * Invoke a non-public method from an object.  To invoke a static non-public
-   * method, <code>obj</code> is ignored.  This invocation may fail if 
+   * method, <code>obj</code> is ignored.  This invocation may fail if
    * SecurityManager is used to enforce access permission.
    * @param obj The object to be used, or null
    * @param method A Method object with the matching parameter types.
@@ -174,7 +201,7 @@ public class Utils {
    * @throws InvocationTargetException
    */
   public static Object invokeMethod(Object obj, Method method, Object... params)
-                    throws IllegalAccessException, IllegalArgumentException, 
+                    throws IllegalAccessException, IllegalArgumentException,
                             InvocationTargetException {
     boolean accessible = true;
     try {
@@ -188,7 +215,7 @@ public class Utils {
       }
     }
   }
-  
+
   /**
    * Invoke a non-public static method by name from a class.  This invocation
    * may faile if SecurityManager is used to enforce access permission.
@@ -209,7 +236,7 @@ public class Utils {
     Method method = getMethod(clz, methodName, params);
     return invokeMethod(null, method, params);
   }
-  
+
   /**
    * Invoke a non-public method by name from an object.  This invocation may
    * fail if SecurityManager is used to enforce access permission.
@@ -229,7 +256,7 @@ public class Utils {
     Method method = getMethod(obj, methodName, params);
     return invokeMethod(obj, method, params);
   }
-  
+
   /**
    * Estimate the total size of all values in a Map.
    * @param props
@@ -242,7 +269,7 @@ public class Utils {
     }
     return size;
   }
-  
+
   /**
    * Evaluate a template and replace all ${var} with values.  '\' is an escaped
    * character for '$', but nested escape is not supported yet.
@@ -276,7 +303,7 @@ public class Utils {
     sb.append(template.substring(start));
     return sb;
   }
-  
+
   /**
    * Evaluate a template file and replace all ${var} with values.  '\' is an
    * escaped character for '$', but nested escape is not supported yet.
@@ -318,13 +345,14 @@ public class Utils {
       }
       return sb;
     } finally {
-      if (reader != null)
+      if (reader != null) {
         reader.close();
+      }
     }
   }
-  
+
   /**
-   * Get the subsequence from head and tail of given size.  If the 
+   * Get the subsequence from head and tail of given size.  If the
    * <code>size</code> is larger or equal to the length of <code>cs</code>, the
    * original <code>cs</code> will be returned.
    * @param cs The char sequence.
@@ -416,7 +444,7 @@ public class Utils {
   public static boolean isNullOrEmpty(Collection c) {
     return (c == null) || (c.size() == 0);
   }
-  
+
   /**
    * Escapes the node portion of a JID according to "JID Escaping" (XEP-0106).
    * Escaping replaces characters prohibited by node-prep with escape sequences,
@@ -437,7 +465,7 @@ public class Utils {
    * </table><p>
    *
    * This process is useful when the node comes from an external source that
-   * doesn't conform to nodeprep. For example, a username in LDAP may be 
+   * doesn't conform to nodeprep. For example, a username in LDAP may be
    * "Joe Smith". Because the &lt;space&gt; character isn't a valid part of a
    * node, the username should be escaped to "Joe\20Smith" before being made
    * into a JID (e.g. "joe\20smith@example.com" after case-folding, etc. has
@@ -448,7 +476,7 @@ public class Utils {
    *
    * This code is copied from org.jivesoft.smack.StringUtils so it can be used
    * by client and server.
-   * 
+   *
    * @param node the node.
    * @return the escaped version of the node.
    */
@@ -528,7 +556,7 @@ public class Utils {
    *
    * This code is copied from org.jivesoft.smack.StringUtils so it can be used
    * by client and server.
-   * 
+   *
    * @param node the escaped version of the node.
    * @return the un-escaped version of the node.
    */
