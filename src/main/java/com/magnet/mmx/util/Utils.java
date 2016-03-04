@@ -19,12 +19,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -270,16 +272,104 @@ public class Utils {
     return size;
   }
 
+  private static class TypedField {
+    String name;
+    String key;
+    int index;
+
+    public TypedField(String name, String key, int index) {
+      this.name = name;
+      this.key = key;
+      this.index = index;
+    }
+  }
+
+  // Parse the field for name, name["key"] or name[index].  If null, it is a
+  // malformed field.
+  private static TypedField parseField(String field) {
+    int start, end;
+    if (((start = field.indexOf('[')) <= 0) ||
+        ((end = field.indexOf(']', ++start)) <= 0)) {
+      return new TypedField(field, null, -1);
+    }
+    String name = field.substring(0, start-1);
+    String indexOrKey = field.substring(start, end).trim();
+    if ((start = indexOrKey.indexOf('"')) < 0) {
+      try {
+        // It is an index because it is not surrounded by quotes.
+        int index = Integer.parseInt(indexOrKey);
+        if (index < 0) {
+          return null;
+        }
+        return new TypedField(name, null, index);
+      } catch (NumberFormatException e) {
+        // A malformed index.
+        return null;
+      }
+    }
+    if ((end = indexOrKey.indexOf('"', ++start)) <= 0) {
+      // A malformed key with missing the closing quote.
+      return null;
+    }
+    // It is a key surrounded by quotes.
+    return new TypedField(name, indexOrKey.substring(start, end), -1);
+  }
+
   /**
-   * Evaluate a template and replace all ${var} with values.  '\' is an escaped
-   * character for '$', but nested escape is not supported yet.
-   * @param template A in-memory template.
+   * Expand a variable and get its value of a nested field from a Map.  A nested
+   * field can be in the form of "name", "name.field", "name.field["key"], or
+   * "name.field[index]".
    * @param props
+   * @param name
+   * @param defVal
    * @return
    */
-  public static CharSequence eval(String template, Map<String, String> props) {
+  public static Object expandVar(Map<String, ?> props, String name,
+                                 Object defVal) {
+    String[] comp = name.split("\\.");
+    Object val = props.get(comp[0]);
+    if (val == null) {
+      return defVal;
+    }
+    for (int i = 1; i < comp.length; i++) {
+      try {
+        TypedField field = parseField(comp[i]);
+        if (field == null) {
+          throw new IllegalArgumentException("Malformed field: "+comp[i]);
+        }
+        Object fieldVal = getFieldValue(val, field.name);
+        if (field.key != null) {
+          if (fieldVal instanceof Map) {
+            val = ((Map<String, Object>) fieldVal).get(field.key);
+          } else {
+            throw new IllegalArgumentException("Field "+field.name+" is not a Map");
+          }
+        } else if (field.index >= 0) {
+          if (fieldVal instanceof List) {
+            val = ((List<Object>) fieldVal).get(field.index);
+          } else {
+            val = Array.get(fieldVal, field.index);
+          }
+        } else if (field.index < 0) {
+          val = fieldVal;
+        }
+        if (val == null) {
+          return defVal;
+        }
+      } catch (Throwable e) {
+        // Index out of bound, NullPoinerException, IllegalArgumentException...
+        return defVal;
+      }
+    }
+    return (val == null) ? defVal : val;
+  }
+
+  // Evaluate an in-memory template and replace all ${var} with values, append
+  // the result to sb.   The performance should be under ~65 u-sec per call with
+  // a Intel Core i7-2760QM 2.4GHz.
+  private static void eval(String template, Map<String, ?> props,
+                           Appendable sb) throws IOException {
     int dollar, end, start = 0;
-    StringBuilder sb = new StringBuilder(template.length()+valuesSize(props));
     while ((dollar = template.indexOf('$', start)) >= 0) {
       if (dollar > 0 && template.charAt(dollar-1) == '\\') {
         sb.append(template.substring(start, dollar-1));
@@ -293,7 +383,7 @@ public class Utils {
       } else {
         sb.append(template.substring(start, dollar));
         String name = template.substring(dollar+2, end);
-        String value = props.get(name);
+        String value = expandVar(props, name, "").toString();
         if (value != null) {
           sb.append(value);
         }
@@ -301,47 +391,50 @@ public class Utils {
       }
     }
     sb.append(template.substring(start));
+  }
+
+  /**
+   * Evaluate a template with nested variables from a Map.  A template may
+   * contain variables as ${name}, ${name.field}, ${name["key"]} (Map), or
+   * ${name[index]} (List or array.)  The '\' is an escaped character for '$';
+   * however, nested escape is not supported yet.  Any malformed or missing
+   * variables will be returned as empty string.
+   * @param template A in-memory template.
+   * @param props
+   * @return
+   */
+  public static CharSequence eval(String template, Map<String, Object> props) {
+    int len = template.length();
+    StringBuilder sb = new StringBuilder((len < 128) ? 256 : (len*2));
+    try {
+      eval(template, props, sb);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
     return sb;
   }
 
   /**
-   * Evaluate a template file and replace all ${var} with values.  '\' is an
-   * escaped character for '$', but nested escape is not supported yet.
+   * Evaluate a template file with nested variables from a Map.  A template may
+   * contain variables as ${name}, ${name.field}, ${name["key"]} (Map), or
+   * ${name[index]} (List or array.)  The '\' is an escaped character for '$';
+   * however, nested escape is not supported yet.  Any malformed or missing
+   * variables will be returned as empty string.
    * @param template A file-based template.
    * @param props
    * @return
    * @throws IOException
    */
-  public static CharSequence eval(File template, Map<String, String> props)
-                              throws IOException {
+  public static CharSequence eval(File template, Map<String, Object> props)
+                                  throws IOException {
     BufferedReader reader = null;
     try {
       String line;
+      int len = (int) template.length();
+      StringBuilder sb = new StringBuilder((len < 128) ? 256 : (len*2));
       reader = new BufferedReader(new FileReader(template));
-      StringBuilder sb = new StringBuilder((int) template.length()+valuesSize(props));
       while ((line = reader.readLine()) != null) {
-        int dollar, end, start = 0;
-        while ((dollar = line.indexOf('$', start)) >= 0) {
-          if (dollar > 0 && line.charAt(dollar-1) == '\\') {
-            sb.append(line.substring(start, dollar-1));
-            sb.append('$');
-            start = dollar + 1;
-          } else if ((line.charAt(dollar+1) != '{') ||
-                      (end = line.indexOf('}', dollar+1)) <= 0) {
-            sb.append(line.substring(start, dollar));
-            sb.append('$');
-            start = dollar + 1;
-          } else {
-            sb.append(line.substring(start, dollar));
-            String name = line.substring(dollar+2, end);
-            String value = props.get(name);
-            if (value != null) {
-              sb.append(value);
-            }
-            start = end + 1;
-          }
-        }
-        sb.append(line.substring(start));
+        eval(line, props, sb);
       }
       return sb;
     } finally {
@@ -354,10 +447,11 @@ public class Utils {
   /**
    * Get the subsequence from head and tail of given size.  If the
    * <code>size</code> is larger or equal to the length of <code>cs</code>, the
-   * original <code>cs</code> will be returned.
+   * original <code>cs</code> will be returned.  The final string length is
+   * <code>size+3</code> as "head...tail"
    * @param cs The char sequence.
    * @param size The subsequence size.
-   * @return A subsequence from head adn tail.
+   * @return A subsequence from head and tail.
    */
   public static CharSequence subSequenceHeadTail(CharSequence cs, int size)  {
     if (cs.length() < size) {
