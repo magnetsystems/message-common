@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -383,9 +384,13 @@ public class Utils {
       } else {
         sb.append(template.substring(start, dollar));
         String name = template.substring(dollar+2, end);
-        String value = expandVar(props, name, "").toString();
+        Object value = expandVar(props, name, "");
         if (value != null) {
-          sb.append(value);
+          if (value instanceof Date) {
+            sb.append(TimeUtil.toString((Date) value)); // use ISO-8601 Zulu format
+          } else {
+            sb.append(value.toString());
+          }
         }
         start = end + 1;
       }
