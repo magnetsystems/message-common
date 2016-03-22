@@ -44,6 +44,10 @@ public enum OSType {
    */
   OSX,
   /**
+   * Web client
+   */
+  WEB,
+  /**
    * Microsoft Windows
    */
   WINDOWS;
