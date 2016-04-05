@@ -39,9 +39,13 @@ public class MmxHeaders extends Hashtable<String, Object> {
    */
   public final static String NO_ACK = "NoAck";
   /**
-   * Allow the sender to notify its offline devices when a message is published.
+   * Notify all devices of the publisher of the new items.
    */
   public final static String SELF_NOTIFICATION = "SelfNotification";
+  /**
+   * Optional push configuration name.
+   */
+  public final static String PUSH_CONFIG = "Push-Config-Name";
   /**
    * A default constructor.
    */
@@ -127,12 +131,12 @@ public class MmxHeaders extends Hashtable<String, Object> {
   }
 
   /**
-   * Allow the sender to enable self notification to its offline devices when
-   * this message is published.  The default is false.
-   * @param notify true to enable self notification; otherwise, false.
+   * Enable or disable to send push notification to publisher's devices.
+   * Default is false.
+   * @param selfNotify true to enable; otherwise, false.
    * @return
    */
-  public MmxHeaders setSelfNotification(boolean notify) {
-    return setHeader(SELF_NOTIFICATION, notify ? Boolean.TRUE : Boolean.FALSE);
+  public MmxHeaders setSelfNotification(boolean selfNotify) {
+    return setHeader(SELF_NOTIFICATION, selfNotify ? Boolean.TRUE : Boolean.FALSE);
   }
 }

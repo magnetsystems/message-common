@@ -23,7 +23,7 @@ import com.magnet.mmx.util.Utils;
  * @hide
  * This class represents an identifier for a channel under the global name-space
  * or under a user name-space.  Under a global name-space, the channel name is
- * unique within the application.  Under a user name-space, channel name is unique 
+ * unique within the application.  Under a user name-space, channel name is unique
  * under a user ID within the application.
  */
 public class MMXChannelId implements MMXChannel {
@@ -44,8 +44,9 @@ public class MMXChannelId implements MMXChannel {
    * @param channel The channel name.
    */
   public MMXChannelId(String channel) {
-    if (channel == null || channel.isEmpty())
+    if (channel == null || channel.isEmpty()) {
       throw new IllegalArgumentException("channel name cannot be null or empty");
+    }
     mChannel = channel;
   }
 
@@ -56,8 +57,9 @@ public class MMXChannelId implements MMXChannel {
    * @param channel The channel name.
    */
   public MMXChannelId(String userId, String channel) {
-    if (channel == null || channel.isEmpty())
+    if (channel == null || channel.isEmpty()) {
       throw new IllegalArgumentException("channel name cannot be null or empty");
+    }
     mChannel = channel;
     mHashCode = mChannel.toLowerCase().hashCode();
     if (userId != null) {
@@ -77,11 +79,14 @@ public class MMXChannelId implements MMXChannel {
    * Get the friendly user ID of the personal channel.
    * @return A user ID of the personal channel or null for global channel.
    */
+  @Override
   public String getUserId() {
-    if (mEscUserId == null)
+    if (mEscUserId == null) {
       return null;
-    if (mUserId != null)
+    }
+    if (mUserId != null) {
       return mUserId;
+    }
     return mUserId = Utils.unescapeNode(mEscUserId);
   }
 
@@ -89,10 +94,11 @@ public class MMXChannelId implements MMXChannel {
    * Get the channel name.  The channel name is case insensitive.
    * @return The channel name.
    */
+  @Override
   public String getName() {
     return mChannel;
   }
-  
+
   /**
    * Get the escaped user ID.
    * @return
@@ -100,11 +106,12 @@ public class MMXChannelId implements MMXChannel {
   public String getEscUserId() {
     return mEscUserId;
   }
-  
+
   /**
    * Check if this channel is under a user name-space.
    * @return true if it is a user channel, false if it is a global channel.
    */
+  @Override
   public boolean isUserChannel() {
     return mEscUserId != null;
   }
@@ -114,24 +121,29 @@ public class MMXChannelId implements MMXChannel {
    * @param channel A channel to be matched
    * @return true if they are equals; otherwise, false.
    */
+  @Override
   public boolean equals(MMXChannel channel) {
-    if (channel == this)
+    if (channel == this) {
       return true;
-    if ((channel == null) || (getUserId() == null ^ channel.getUserId() == null))
+    }
+    if ((channel == null) || (getUserId() == null ^ channel.getUserId() == null)) {
       return false;
-    if ((mUserId != null) && !mUserId.equalsIgnoreCase(channel.getUserId()))
+    }
+    if ((mUserId != null) && !mUserId.equalsIgnoreCase(channel.getUserId())) {
       return false;
+    }
     return mChannel.equalsIgnoreCase(channel.getName());
   }
-  
+
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof MMXChannel))
+    if (!(obj instanceof MMXChannel)) {
       return false;
+    }
     MMXChannel channel = (MMXChannel) obj;
     return equals(channel);
   }
-  
+
   /**
    * Get the hash code based on the lower case of the channel name.
    */
@@ -142,7 +154,7 @@ public class MMXChannelId implements MMXChannel {
     }
     return mHashCode;
   }
-  
+
   /**
    * Get a string representation of this channel identifier.  Caller must ignore
    * the case of the string representation.
@@ -154,7 +166,16 @@ public class MMXChannelId implements MMXChannel {
     String userId = getUserId();
     return (userId == null) ? "*/"+mChannel : userId+'/'+mChannel;
   }
-  
+
+  /**
+   * Construct to a URL path component for this channel.
+   * @return The path in the form of "[userID#]channel".
+   */
+  public String toPath() {
+    String userId = getUserId();
+    return (userId == null) ? mChannel : userId+'#'+mChannel;
+  }
+
   /**
    * Convert a string representation of channel identifier to the object.
    * @param channelId The value from {@link #toString()}
@@ -170,7 +191,7 @@ public class MMXChannelId implements MMXChannel {
     }
     throw new IllegalArgumentException("Not a valid channel format: "+channelId);
   }
-  
+
   /**
    * @hide
    */
