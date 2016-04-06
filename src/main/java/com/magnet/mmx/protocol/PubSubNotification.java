@@ -20,6 +20,8 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * The payload for PubSub wakeup (silent notifification) or push notification.
+ * Any reserved properties (e.g. title, body, sound, badge) used by APNS can be
+ * added to this JSON payload.
  */
 public class PubSubNotification {
   @SerializedName("text")
@@ -32,6 +34,8 @@ public class PubSubNotification {
   private final String mTitle;
   @SerializedName("body")
   private final String mBody;
+  @SerializedName("sound")
+  private final String mSound;
 
   /**
    * @hide
@@ -46,23 +50,44 @@ public class PubSubNotification {
     mText = text;
     mTitle = null;
     mBody = null;
+    mSound = null;
+  }
+
+  /**
+   * @hide
+   * Constructor with a Channel object for push notification without sound.  The
+   * optional text will be set to the <code>title</code> for backward
+   * compatibility.
+   * @param channel The channel name.
+   * @param pubDate The oldest publish date of the new items.
+   * @param title A non-null title for push notification.
+   * @param body An optional body for push notification.
+   */
+  public PubSubNotification(MMXChannelId channel, Date pubDate, String title,
+                            String body) {
+    this(channel, pubDate, title, body, null);
   }
 
   /**
    * @hide
    * Constructor with a Channel object for push notification.  The optional text
    * will be set to the <code>title</code> for backward compatibility.
-   * @param channel The channel name.
+   * @param channel The channel name.  If a sound file name is specified in
+   * <code>sound</code>, it will be platform dependent.  It is recommended to
+   * use either "default" or null for portability.
    * @param pubDate The oldest publish date of the new items.
    * @param title A non-null title for push notification.
    * @param body An optional body for push notification.
+   * @param sound "default", name-of-sound-file, or null.
    */
-  public PubSubNotification(MMXChannelId channel, Date pubDate, String title, String body) {
+  public PubSubNotification(MMXChannelId channel, Date pubDate, String title,
+                            String body, String sound) {
     mChannel = channel;
     mPublishDate = pubDate;
     mText = title;
     mTitle = title;
     mBody = body;
+    mSound = sound;
   }
 
   /**
@@ -79,14 +104,31 @@ public class PubSubNotification {
 
   /**
    * @hide
-   * Constructor with a lower Topic object for push notification.
+   * Constructor with a Topic object for push notification without sound.
    * @param topic The topic name
    * @param pubDate
    * @param title
    * @param body
    */
-  public PubSubNotification(MMXTopicId topic, Date pubDate, String title, String body) {
-    this(topic.toMMXChannelId(), pubDate, title, body);
+  public PubSubNotification(MMXTopicId topic, Date pubDate, String title,
+                            String body) {
+    this(topic.toMMXChannelId(), pubDate, title, body, null);
+  }
+
+  /**
+   * @hide
+   * Constructor with a Topic object for push notification.  If a sound file name
+   * is specified in <code>sound</code>, it will be platform dependent.  It is
+   * recommended to use either "default" or null for portability.
+   * @param topic The topic name
+   * @param pubDate
+   * @param title
+   * @param body
+   * @param sound "default", sound-file-name, or null.
+   */
+  public PubSubNotification(MMXTopicId topic, Date pubDate, String title,
+                            String body, String sound) {
+    this(topic.toMMXChannelId(), pubDate, title, body, sound);
   }
 
   /**
@@ -129,6 +171,15 @@ public class PubSubNotification {
    */
   public Date getPublishDate() {
     return mPublishDate;
+  }
+
+  /**
+   * Get the sound to be used for notification.  The value "default" is reserved
+   * for default notification sound.
+   * @return null or a sound file name.
+   */
+  public String getSound() {
+    return mSound;
   }
 
   /**
