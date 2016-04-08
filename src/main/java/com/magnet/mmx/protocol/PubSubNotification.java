@@ -19,7 +19,7 @@ import java.util.Date;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * The payload for PubSub wakeup (silent notifification) or push notification.
+ * The payload for PubSub wakeup (silent notification) or push notification.
  * Any reserved properties (e.g. title, body, sound, badge) used by APNS can be
  * added to this JSON payload.
  */
@@ -30,6 +30,8 @@ public class PubSubNotification {
   private final MMXChannelId mChannel;
   @SerializedName("publishDate")
   private final Date mPublishDate;
+  @SerializedName("publisher")
+  private final MMXid mPublisher;
   @SerializedName("title")
   private final String mTitle;
   @SerializedName("body")
@@ -41,12 +43,15 @@ public class PubSubNotification {
    * @hide
    * Constructor with a Channel object for wake-up (silent notification.)
    * @param channel The channel name.
-   * @param pubDate The oldest publish date of the new items.
+   * @param pubDate The oldest publish date among the new items.
+   * @param publisher The oldest publisher among the new items.
    * @param text Optional text message, or null
    */
-  public PubSubNotification(MMXChannelId channel, Date pubDate, String text) {
+  public PubSubNotification(MMXChannelId channel, Date pubDate, MMXid publisher,
+                            String text) {
     mChannel = channel;
     mPublishDate = pubDate;
+    mPublisher = publisher;
     mText = text;
     mTitle = null;
     mBody = null;
@@ -63,9 +68,9 @@ public class PubSubNotification {
    * @param title A non-null title for push notification.
    * @param body An optional body for push notification.
    */
-  public PubSubNotification(MMXChannelId channel, Date pubDate, String title,
-                            String body) {
-    this(channel, pubDate, title, body, null);
+  public PubSubNotification(MMXChannelId channel, Date pubDate, MMXid publisher,
+                            String title, String body) {
+    this(channel, pubDate, publisher, title, body, null);
   }
 
   /**
@@ -75,15 +80,17 @@ public class PubSubNotification {
    * @param channel The channel name.  If a sound file name is specified in
    * <code>sound</code>, it will be platform dependent.  It is recommended to
    * use either "default" or null for portability.
-   * @param pubDate The oldest publish date of the new items.
+   * @param pubDate The oldest publish date among the new items.
+   * @param publisher The oldest publisher among the new items.
    * @param title A non-null title for push notification.
    * @param body An optional body for push notification.
    * @param sound "default", name-of-sound-file, or null.
    */
-  public PubSubNotification(MMXChannelId channel, Date pubDate, String title,
-                            String body, String sound) {
+  public PubSubNotification(MMXChannelId channel, Date pubDate, MMXid publisher,
+                            String title, String body, String sound) {
     mChannel = channel;
     mPublishDate = pubDate;
+    mPublisher = publisher;
     mText = title;
     mTitle = title;
     mBody = body;
@@ -96,10 +103,12 @@ public class PubSubNotification {
    * The Topic object will be converted to Channel object.
    * @param topic The topic name.
    * @param pubDate The oldest publish date of the new items.
+   * @param publisher The publisher.
    * @param text Optional text message, or null.
    */
-  public PubSubNotification(MMXTopicId topic, Date pubDate, String text) {
-    this(topic.toMMXChannelId(), pubDate, text);
+  public PubSubNotification(MMXTopicId topic, Date pubDate, MMXid publisher,
+                            String text) {
+    this(topic.toMMXChannelId(), pubDate, publisher, text);
   }
 
   /**
@@ -107,12 +116,13 @@ public class PubSubNotification {
    * Constructor with a Topic object for push notification without sound.
    * @param topic The topic name
    * @param pubDate
+   * @param publisher
    * @param title
    * @param body
    */
-  public PubSubNotification(MMXTopicId topic, Date pubDate, String title,
-                            String body) {
-    this(topic.toMMXChannelId(), pubDate, title, body, null);
+  public PubSubNotification(MMXTopicId topic, Date pubDate, MMXid publisher,
+                            String title, String body) {
+    this(topic.toMMXChannelId(), pubDate, publisher, title, body, null);
   }
 
   /**
@@ -122,13 +132,14 @@ public class PubSubNotification {
    * recommended to use either "default" or null for portability.
    * @param topic The topic name
    * @param pubDate
+   * @param publisher
    * @param title
    * @param body
    * @param sound "default", sound-file-name, or null.
    */
-  public PubSubNotification(MMXTopicId topic, Date pubDate, String title,
-                            String body, String sound) {
-    this(topic.toMMXChannelId(), pubDate, title, body, sound);
+  public PubSubNotification(MMXTopicId topic, Date pubDate, MMXid publisher,
+                            String title, String body, String sound) {
+    this(topic.toMMXChannelId(), pubDate, publisher, title, body, sound);
   }
 
   /**
@@ -166,11 +177,19 @@ public class PubSubNotification {
   }
 
   /**
-   * Get the published date of the new items.
-   * @return The published date of the new items.
+   * Get the published date of the new item.
+   * @return The published date of the new item.
    */
   public Date getPublishDate() {
     return mPublishDate;
+  }
+
+  /**
+   * Get the publisher of the new item.
+   * @return The publisher of the new item.
+   */
+  public MMXid getPublisher() {
+    return mPublisher;
   }
 
   /**
