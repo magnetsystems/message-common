@@ -76,10 +76,11 @@ public class PubSubNotification {
   /**
    * @hide
    * Constructor with a Channel object for push notification.  The optional text
-   * will be set to the <code>title</code> for backward compatibility.
-   * @param channel The channel name.  If a sound file name is specified in
-   * <code>sound</code>, it will be platform dependent.  It is recommended to
-   * use either "default" or null for portability.
+   * will be set to the <code>title</code> for backward compatibility.  If a
+   * sound name is specified in <code>sound</code>, it will be platform
+   * dependent.  It is recommended to use either "default" or null for
+   * portability.
+   * @param channel The channel name.
    * @param pubDate The oldest publish date among the new items.
    * @param publisher The oldest publisher among the new items.
    * @param title A non-null title for push notification.
@@ -127,7 +128,7 @@ public class PubSubNotification {
 
   /**
    * @hide
-   * Constructor with a Topic object for push notification.  If a sound file name
+   * Constructor with a Topic object for push notification.  If a sound name
    * is specified in <code>sound</code>, it will be platform dependent.  It is
    * recommended to use either "default" or null for portability.
    * @param topic The topic name
