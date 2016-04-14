@@ -26,7 +26,11 @@ import java.util.Date;
 public class ChannelInfo extends MMXChannelId implements MMXChannel {
 
   @SerializedName("isCollection")
-  private boolean mCollection;
+  private final boolean mCollection;
+  @SerializedName("channelId")
+  private String mId;
+  @SerializedName("displayName")
+  private String mDisplayName;
   @SerializedName("description")
   private String mDescription;
   @SerializedName("isPersistent")
@@ -65,7 +69,43 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   public boolean isCollection() {
     return mCollection;
   }
-  
+
+  /**
+   * Get the channel ID.
+   * @return The channel ID.
+   */
+  public String getId() {
+    return mId;
+  }
+
+  /**
+   * Set the channel ID.
+   * @param id The channel ID.
+   * @return This object.
+   */
+  public ChannelInfo setId(String id) {
+    this.mId = id;
+    return this;
+  }
+
+  /**
+   * Get the channel display name.
+   * @return The display name.
+   */
+  public String getDisplayName() {
+    return mDisplayName;
+  }
+
+  /**
+   * Set the channel display name.
+   * @param displayName The display name, or null.
+   * @return This object.
+   */
+  public ChannelInfo setDisplayName(String displayName) {
+    mDisplayName = displayName;
+    return this;
+  }
+
   /**
    * Get the channel description.
    * @return The description, or null.
@@ -224,8 +264,10 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
    */
   @Override
   public String toString() {
-    return "[channel="+super.toString()+", desc="+mDescription+", sub="+mSubscriptionEnabled+
-        ", maxItems="+mMaxItems+", maxSize="+mMaxPayloadSize+", pubtype="+mPublisherType+
-        ", create="+mCreationDate+", mod="+mModifiedDate+"]";
+    return "[channel="+super.toString()+", id="+mId+", name="+mDisplayName+
+        ", desc="+mDescription+", sub="+mSubscriptionEnabled+
+        ", maxItems="+mMaxItems+", maxSize="+mMaxPayloadSize+
+        ", pubtype="+mPublisherType+", create="+mCreationDate+
+        ", mod="+mModifiedDate+"]";
   }
 }
