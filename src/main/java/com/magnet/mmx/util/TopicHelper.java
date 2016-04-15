@@ -189,6 +189,34 @@ public class TopicHelper {
   }
 
   /**
+   * Convert an XMPP nodeID /appID/&asterisk;/topicID or /appID/userID/topicID
+   * into "topicID" or "userID#topicID."  This separates the dependency between
+   * topic name and topic ID.
+   * @param nodeId A XMPP PubSub nodeID string.
+   * @return A unique topic ID within an application, or null if not an MMX topic.
+   */
+  public static String convertToId(String nodeId) {
+    if (nodeId.charAt(0) != TOPIC_DELIM) {
+      return null;
+    }
+    int index1 = nodeId.indexOf(TOPIC_DELIM, 1);
+    if (index1 < 0) {
+      return null;
+    }
+    int index2 = nodeId.indexOf(TOPIC_DELIM, index1+1);
+    if (index2 < 0) {
+      return null;
+    }
+    String userId = nodeId.substring(index1+1, index2);
+    String topicId = nodeId.substring(index2+1);
+    if (userId.charAt(0) == TOPIC_FOR_APP) {
+      return topicId;
+    } else {
+      return userId + TOPIC_SEPARATOR + topicId;
+    }
+  }
+
+  /**
    * @hide
    * Make a complete topic path.  There is a special root path if both userId
    * and topic are null.  The path may be "appID", "/appID/*", "/appID/userID",
@@ -399,5 +427,38 @@ public class TopicHelper {
     }
     Matcher matcher = TOPIC_NAME_PATTERN.matcher(topicName);
     return matcher.matches();
+  }
+
+  /**
+   * The hack to fix MOB-2516 that allows the console to display user topics as
+   * userID#topicName.  This method parses the global topic or user topic properly.
+   * TODO: once the name and ID are decoupled, this method can be deprecated.
+   * @param topicName The form of "topicID" or "userID#topicID".
+   * @return
+   * @see #idToName(String, String)
+   */
+  public static MMXTopicId nameToId(String topicName) {
+    int index = topicName.indexOf(TOPIC_SEPARATOR);
+    if (index < 0) {
+      return new MMXTopicId(topicName);
+    } else {
+      return new MMXTopicId(topicName.substring(0, index), topicName.substring(index+1));
+    }
+  }
+
+  /**
+   * The hack to fix MOB-2516 to convert a user topic to userId#topicName.
+   * TODO: once the name and ID are decoupled, this method can be deprecated.
+   * @param userId
+   * @param topicName
+   * @return
+   * @see #nameToId(String)
+   */
+  public static String idToName(String userId, String topicName) {
+    if (userId == null) {
+      return topicName;
+    } else {
+      return userId + TOPIC_SEPARATOR + topicName;
+    }
   }
 }

@@ -16,6 +16,7 @@
 package com.magnet.mmx.protocol;
 
 import com.google.gson.annotations.SerializedName;
+import com.magnet.mmx.util.ChannelHelper;
 import com.magnet.mmx.util.GsonData;
 import com.magnet.mmx.util.Utils;
 
@@ -158,23 +159,24 @@ public class MMXChannelId implements MMXChannel {
   /**
    * Get a string representation of this channel identifier.  Caller must ignore
    * the case of the string representation.
-   * @return A string in "&#42/channel" for global channel or "userID/channel" for user channel.
+   * @return A string in "channel" for global channel or "userID#channel" for user channel.
    * @see #parse(String)
    */
   @Override
   public String toString() {
     String userId = getUserId();
-    return (userId == null) ? "*/"+mChannel : userId+'/'+mChannel;
+    return (userId == null) ? mChannel : userId+ChannelHelper.CHANNEL_SEPARATOR+mChannel;
   }
 
   /**
-   * Construct to a URL path component for this channel.
-   * @return The path in the form of "[userID#]channel".
+   * Get the channel ID.  The channel ID can be used in the URL path.  Currently
+   * the ID is derived from the name.  TODO: decouple the ID from the channel name.
+   * @return The ID in the form of "[userID#]channelID".
    */
-  public String toPath() {
+  public String getId() {
     String userId = getUserId();
-    return (userId == null) ? mChannel : userId+'#'+mChannel;
-  }
+    return (userId == null) ? mChannel.toLowerCase() :
+            userId+ChannelHelper.CHANNEL_SEPARATOR+mChannel.toLowerCase();  }
 
   /**
    * Convert a string representation of channel identifier to the object.
@@ -183,11 +185,11 @@ public class MMXChannelId implements MMXChannel {
    * @see #toString()
    */
   public static MMXChannelId parse(String channelId) {
-    int slash = channelId.indexOf('/');
-    if ((slash == 1) && (channelId.charAt(0) == '*')) {
-      return new MMXChannelId(channelId.substring(slash+1));
-    } else if (slash >= 1) {
-      return new MMXChannelId(channelId.substring(0, slash), channelId.substring(slash+1));
+    int hash = channelId.indexOf(ChannelHelper.CHANNEL_SEPARATOR);
+    if (hash < 0) {
+      return new MMXChannelId(channelId);
+    } else if (hash > 0) {
+      return new MMXChannelId(channelId.substring(0, hash), channelId.substring(hash+1));
     }
     throw new IllegalArgumentException("Not a valid channel format: "+channelId);
   }

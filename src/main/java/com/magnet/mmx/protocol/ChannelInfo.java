@@ -45,7 +45,6 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   private Date mModifiedDate;
   @SerializedName("publishPermission")
   private TopicAction.PublisherType mPublisherType;
-
   @SerializedName("creatorUserId")
   private String mCreator;
   @SerializedName("subscriptionEnabled")
@@ -79,8 +78,10 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   }
 
   /**
-   * Set the channel ID.
-   * @param id The channel ID.
+   * Set the ID for this channel info.  The ID is either in the form of
+   * "channelID" or "userID#channelID" which will be used in nodeID as
+   * /appID/&asterisk;/channelID or /appID/userID/channelID.
+   * @param id
    * @return This object.
    */
   public ChannelInfo setId(String id) {

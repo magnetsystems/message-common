@@ -77,7 +77,7 @@ public class ChannelHelper {
   /**
    * @hide
    * Assuming that <code>channelId</code> is in the form of "/appId/*" or
-   * "/appId/userId", check if it is a user channel. 
+   * "/appId/userId", check if it is a user channel.
    * @param channelId
    * @return
    */
@@ -85,7 +85,7 @@ public class ChannelHelper {
     int index = channelId.indexOf(CHANNEL_DELIM, 1);
     return (index > 1) && (channelId.charAt(index+1) != CHANNEL_FOR_APP);
   }
-  
+
   /**
    * Check if the channel with specified id is a channel for the passed in appId
    * @param channelId A path should be started with "/appId/".
@@ -124,7 +124,7 @@ public class ChannelHelper {
       return false;
     }
   }
-  
+
   /**
    * Construct an application prefix for the channel.
    * @param appId
@@ -133,7 +133,7 @@ public class ChannelHelper {
   public static String makePrefix(String appId) {
     return CHANNEL_DELIM + appId + CHANNEL_DELIM;
   }
-  
+
   /**
    * Parse an XMPP nodeID into a AppChannel object.  There are two formats:
    * /appID/*&#x002Fchannel for global channel and /appID/userID/channel for personal
@@ -142,21 +142,24 @@ public class ChannelHelper {
    * @return An AppChannel object, or null if not an MMX channel.
    */
   public static AppChannel parseChannel(String channel) {
-    if (channel.charAt(0) != CHANNEL_DELIM)
+    if (channel.charAt(0) != CHANNEL_DELIM) {
       return null;
+    }
     int index1 = channel.indexOf(CHANNEL_DELIM, 1);
-    if (index1 < 0)
+    if (index1 < 0) {
       return null;
+    }
     int index2 = channel.indexOf(CHANNEL_DELIM, index1+1);
-    if (index2 < 0)
+    if (index2 < 0) {
       return null;
+    }
     String appId = channel.substring(1, index1);
     String userId = channel.substring(index1+1, index2);
     String channelName = channel.substring(index2+1);
     return new AppChannel(appId, (userId.charAt(0) == CHANNEL_FOR_APP) ?
                       null : userId, channelName);
   }
-  
+
   /**
    * Parse an XMPP nodeID into a Channel ID object.  There are two formats:
    * /appID/*&#x002Fchannel for global channel and /appID/userID/channel for personal
@@ -165,20 +168,51 @@ public class ChannelHelper {
    * @return A MMXChannelId, or null if not an MMX channel.
    */
   public static MMXChannelId parseNode(String nodeId) {
-    if (nodeId.charAt(0) != CHANNEL_DELIM)
+    if (nodeId.charAt(0) != CHANNEL_DELIM) {
       return null;
+    }
     int index1 = nodeId.indexOf(CHANNEL_DELIM, 1);
-    if (index1 < 0)
+    if (index1 < 0) {
       return null;
+    }
     int index2 = nodeId.indexOf(CHANNEL_DELIM, index1+1);
-    if (index2 < 0)
+    if (index2 < 0) {
       return null;
+    }
     String userId = nodeId.substring(index1+1, index2);
     String channelName = nodeId.substring(index2+1);
     return new MMXChannelId((userId.charAt(0) == CHANNEL_FOR_APP) ?
         null : userId, channelName);
   }
-  
+
+  /**
+   * Convert an XMPP nodeID /appID/&asterisk;/channelID or /appID/userID/channelID
+   * into "channelID" or "userID#channelID."  This separates the dependency between
+   * channel name and channel ID.
+   * @param nodeId A XMPP PubSub nodeID string.
+   * @return A unique channel ID within an application, or null if not an MMX channel.
+   */
+  public static String converToId(String nodeId) {
+    if (nodeId.charAt(0) != CHANNEL_DELIM) {
+      return null;
+    }
+    int index1 = nodeId.indexOf(CHANNEL_DELIM, 1);
+    if (index1 < 0) {
+      return null;
+    }
+    int index2 = nodeId.indexOf(CHANNEL_DELIM, index1+1);
+    if (index2 < 0) {
+      return null;
+    }
+    String userId = nodeId.substring(index1+1, index2);
+    String channelId = nodeId.substring(index2+1);
+    if (userId.charAt(0) == CHANNEL_FOR_APP) {
+      return channelId;
+    } else {
+      return userId + CHANNEL_SEPARATOR + channelId;
+    }
+  }
+
   /**
    * @hide
    * Make a complete channel path.  There is a special root path if both userId
@@ -193,7 +227,7 @@ public class ChannelHelper {
     if (userId == null && channel == null) {
       return appId;
     }
-    
+
     int len = appId.length() + 2;
     if (userId == null || userId.isEmpty()) {
       ++len;
@@ -211,7 +245,7 @@ public class ChannelHelper {
       }
       len += channel.length();
     }
-    
+
     StringBuilder sb = new StringBuilder(len);
     sb.append(CHANNEL_DELIM).append(appId).append(CHANNEL_DELIM);
     if (userId == null) {
@@ -227,7 +261,7 @@ public class ChannelHelper {
     }
     return sb.toString();
   }
-  
+
   /**
    * Construct the OS channel with an optional version.
    * @param os An OS type, or null for all OS's.
@@ -235,14 +269,16 @@ public class ChannelHelper {
    * @return
    */
   public static String makeOSChannel(OSType os, String version) {
-    if (os == null)
+    if (os == null) {
       return CHANNEL_OS_ROOT;
-    if (version == null)
+    }
+    if (version == null) {
       return CHANNEL_OS + os.toString();
-    else
+    } else {
       return CHANNEL_OS + os.toString() + CHANNEL_DELIM + version;
+    }
   }
-  
+
   /**
    * @hide
    * Find the length of the prefix in the channel.  It is the third slash in the
@@ -256,10 +292,10 @@ public class ChannelHelper {
     offset = path.indexOf(CHANNEL_DELIM, offset+1);
     return ++offset;
   }
-  
+
   /**
    * @hide
-   * Get the parent full path of the channel.  The parent full path would be 
+   * Get the parent full path of the channel.  The parent full path would be
    * "/appId/userId/parent..." where the prefix is "/appId/userId/".
    * @param prefix The prefix length.
    * @param path The channel full path.
@@ -267,11 +303,12 @@ public class ChannelHelper {
    */
   public static String getParent(int prefix, String path) {
     int offset = path.lastIndexOf(CHANNEL_DELIM);
-    if (offset < prefix)
+    if (offset < prefix) {
       return null;
+    }
     return path.substring(0, offset);
   }
-  
+
   /**
    * Get the base name of the path.
    * @param path The full channel path
@@ -279,11 +316,12 @@ public class ChannelHelper {
    */
   public static String getBaseName(String path) {
     int offset = path.lastIndexOf(CHANNEL_DELIM);
-    if (offset < 0)
+    if (offset < 0) {
       return path;
+    }
     return path.substring(offset+1);
   }
-  
+
   /**
    * Get the root node ID from the path.  In the current implementation, it is
    * the app ID.
@@ -299,12 +337,12 @@ public class ChannelHelper {
       return path.substring(start, offset);
     }
   }
-  
+
   /**
    * @hide
    * Normalize the channel path by collapsing all contiguous '/' and make it lower
    * case.  It also makes sure that channel cannot be null, empty, start or end
-   * with '/'. 
+   * with '/'.
    * @param path A channel path.
    * @return A normalized channel path.
    * @throws IllegalArgumentException Channel cannot be null or empty.
@@ -336,10 +374,10 @@ public class ChannelHelper {
     }
     return sb.toString();
   }
-  
+
   /**
    * @hide
-   * Validate the channel name. 
+   * Validate the channel name.
    * @param channel A non-null channel with path syntax.
    * @throws IllegalArgumentException Channel cannot contain '/'.
    */
@@ -366,7 +404,7 @@ public class ChannelHelper {
     }
     return false;
   }
-  
+
   public static void restrictPathSyntax(boolean restrict) {
     CHANNEL_RESTRICTED_NAME = restrict;
   }
@@ -386,5 +424,39 @@ public class ChannelHelper {
     }
     Matcher matcher = CHANNEL_NAME_PATTERN.matcher(channelName);
     return matcher.matches();
+  }
+
+  /**
+   * The hack to fix MOB-2516 that allows the console to display user channels
+   * as userID#channelName. This method parses the global channel or user
+   * channel properly.
+   * TODO: once the name and ID are decoupled, this method can be deprecated.
+   * @param channelName The form of "channelID" or "userID#channelID".
+   * @return
+   */
+  public static MMXChannelId nameToId(String channelName) {
+      int index = channelName.indexOf(CHANNEL_SEPARATOR);
+      if (index < 0) {
+          return new MMXChannelId(channelName);
+      } else {
+          return new MMXChannelId(channelName.substring(0, index), channelName
+                  .substring(index + 1));
+      }
+  }
+
+  /**
+   * The hack to fix MOB-2516 to convert a user channel to userID#channelName.
+   * TODO: once the name and ID are decoupled, this method can be deprecated.
+   * @param userId
+   * @param channelName
+   * @return
+   */
+  public static String idToName(String userId, String channelName) {
+
+      if (userId == null) {
+          return channelName;
+      } else {
+          return userId + CHANNEL_SEPARATOR + channelName;
+      }
   }
 }

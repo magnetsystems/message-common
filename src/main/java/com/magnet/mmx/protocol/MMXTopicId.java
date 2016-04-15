@@ -17,6 +17,7 @@ package com.magnet.mmx.protocol;
 
 import com.google.gson.annotations.SerializedName;
 import com.magnet.mmx.util.GsonData;
+import com.magnet.mmx.util.TopicHelper;
 import com.magnet.mmx.util.Utils;
 
 /**
@@ -169,22 +170,24 @@ public class MMXTopicId implements MMXTopic {
   /**
    * Get a string representation of this topic identifier.  Caller must ignore
    * the case of the string representation.
-   * @return A string in "&#42/topic" for global topic or "userID/topic" for user topic.
+   * @return A string in "topic" for global topic or "userID#topic" for user topic.
    * @see #parse(String)
    */
   @Override
   public String toString() {
     String userId = getUserId();
-    return (userId == null) ? "*/"+mTopic : userId+'/'+mTopic;
+    return (userId == null) ? mTopic : userId+TopicHelper.TOPIC_SEPARATOR+mTopic;
   }
 
   /**
-   * Construct to a URL path component for this topic.
-   * @return The path in the form of "[userID#]topic".
+   * Get the topic ID.  The topic ID can be used in the URL path.  Currently the
+   * ID is derived from the name. TODO: decouple the ID from the topic name.
+   * @return The ID in the form of "[userID#]topicID".
    */
-  public String toPath() {
+  public String getId() {
     String userId = getUserId();
-    return (userId == null) ? mTopic : userId+'#'+mTopic;
+    return (userId == null) ? mTopic.toLowerCase() :
+            userId+TopicHelper.TOPIC_SEPARATOR+mTopic.toLowerCase();
   }
 
   /**
@@ -194,11 +197,11 @@ public class MMXTopicId implements MMXTopic {
    * @see #toString()
    */
   public static MMXTopicId parse(String topicId) {
-    int slash = topicId.indexOf('/');
-    if ((slash == 1) && (topicId.charAt(0) == '*')) {
-      return new MMXTopicId(topicId.substring(slash+1));
-    } else if (slash >= 1) {
-      return new MMXTopicId(topicId.substring(0, slash), topicId.substring(slash+1));
+    int hash = topicId.indexOf(TopicHelper.TOPIC_SEPARATOR);
+    if (hash < 0) {
+      return new MMXTopicId(topicId);
+    } else if (hash > 0){
+      return new MMXTopicId(topicId.substring(0, hash), topicId.substring(hash+1));
     }
     throw new IllegalArgumentException("Not a valid topic format: "+topicId);
   }

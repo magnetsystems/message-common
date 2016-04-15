@@ -83,8 +83,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   }
 
   /**
-   * Set the ID for this topic info.  The ID is a component of the nodeID which
-   * has a format of /appID/userID/ID or /appID/&asterisk;/ID.
+   * Set the ID for this topic info.  The ID is either in the form of "topicID"
+   * or "userID#topicID" which will be used in nodeID as
+   * /appID/&asterisk;/topicID or /appID/userID/topicID.
    * @param id
    * @return This object.
    */
