@@ -51,6 +51,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   @SerializedName("subscriptionEnabled")
   private boolean mSubscriptionEnabled;
 
+  @SerializedName("isPushMutedByUser")
+  private boolean mPushMutedByUser;
+
 
   /**
    * @hide
@@ -262,6 +265,25 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
     mSubscriptionEnabled = subscriptionEnabled;
     return this;
   }
+
+
+  /**
+   * Is push muted by user for this topic?
+   * @return
+   */
+  public boolean isPushMutedByUser() {
+    return mPushMutedByUser;
+  }
+
+  /**
+   * @param pushMutedByUser
+   * @return
+   */
+  public TopicInfo setPushMutedByUser(boolean pushMutedByUser) {
+    mPushMutedByUser = pushMutedByUser;
+    return this;
+  }
+
 
   /**
    * Get the topic information in string format for debug purpose.
