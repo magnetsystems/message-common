@@ -105,6 +105,9 @@ public class TemplateDataModel {
     private NameDesc channel;
     private MsgData msg;
 
+    public ValidationRequest() {
+    }
+
     public ValidationRequest(TemplateDataModel.MockPushConfig config,
                 NameDesc application, NameDesc channel, MsgData msg) {
       this.config = config;
@@ -180,6 +183,9 @@ public class TemplateDataModel {
     private Date date;
     private Map<String, String> content;
 
+    public MsgData() {
+    }
+
     public MsgData(String from, Date pubDate, Map<String, String> content) {
       this.from = from;
       this.date = pubDate;
@@ -219,6 +225,9 @@ public class TemplateDataModel {
     private String desc;
     private int count;
 
+    public NameDesc() {
+    }
+
     public NameDesc(String name, String desc, int count) {
       this.name = name;
       this.desc = desc;
@@ -256,6 +265,9 @@ public class TemplateDataModel {
   public static class MockPushConfig {
     private boolean mSilentPush;
     private Map<String, String> mMeta;
+
+    public MockPushConfig() {
+    }
 
     public MockPushConfig(boolean silentPush, Map<String, String> meta) {
       mSilentPush = silentPush;
