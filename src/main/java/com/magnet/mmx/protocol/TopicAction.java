@@ -53,8 +53,9 @@ public class TopicAction {
     public static final String[] names=new String[values().length];
     static {
       PublisherType[] values=values();
-      for(int i=0;i<values.length;i++)
+      for(int i=0;i<values.length;i++) {
         names[i]=values[i].name();
+      }
     }
   };
 
@@ -82,11 +83,11 @@ public class TopicAction {
    */
   public static class TopicTags extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("tags")
-    private List<String> mTags;
+    private final List<String> mTags;
     @SerializedName("lastModTime")
     private Date mLastModTime;
     private transient MMXTopic mMMXTopic;
@@ -143,11 +144,12 @@ public class TopicAction {
      * @return The topic.
      */
     public MMXTopic getTopic() {
-      if (mMMXTopic == null)
+      if (mMMXTopic == null) {
         mMMXTopic = new MMXTopicId(mUserId, mTopic);
+      }
       return mMMXTopic;
     }
-    
+
     /**
      * Get the tags.
      * @return A list of tags or an empty list.
@@ -185,15 +187,15 @@ public class TopicAction {
    */
   public static class CreateRequest extends JSONifiable {
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("isPersonal")
-    private boolean mPersonal;
+    private final boolean mPersonal;
     @SerializedName("isCollection")
-    private boolean mCollection;
+    private final boolean mCollection;
     @SerializedName("options")
-    private MMXTopicOptions mOptions;
+    private final MMXTopicOptions mOptions;
     @SerializedName("roles")
-    private List<String> roles;
+    private final List<String> roles;
 
     /**
      * Default constructor.  A path-like topic name provides a simplified syntax
@@ -281,9 +283,9 @@ public class TopicAction {
    */
   public static class DeleteRequest extends JSONifiable {
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("isPersonal")
-    private boolean mPersonal;
+    private final boolean mPersonal;
 
     /**
      * Default constructor for the topic deletion request.
@@ -322,9 +324,9 @@ public class TopicAction {
    */
   public static class RetractAllRequest extends JSONifiable {
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("isPersonal")
-    private boolean mPersonal;
+    private final boolean mPersonal;
 
     /**
      * Constructor to retract all published items from a personal topic or
@@ -357,11 +359,11 @@ public class TopicAction {
    */
   public static class RetractRequest extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("itemIds")
-    private List<String> mItemIds;
+    private final List<String> mItemIds;
 
     /**
      * Constructor to retract published items from a topic.  The requester must
@@ -409,36 +411,36 @@ public class TopicAction {
 
   public static class GetTopicsRequest extends ArrayList<MMXTopicId> {
     public GetTopicsRequest() {
-      super(); 
+      super();
     }
-    
+
     public static GetTopicsRequest fromJson(String json) {
       return GsonData.getGson().fromJson(json, GetTopicsRequest.class);
     }
   }
-  
+
   public static class GetTopicsResponse extends ArrayList<TopicInfo> {
     public GetTopicsResponse() {
       super();
     }
-    
+
     public static GetTopicsResponse fromJson(String json) {
       return GsonData.getGson().fromJson(json, GetTopicsResponse.class);
     }
   }
-  
+
   /**
    * @hide
    * A request to access published items by ID's.
    */
   public static class ItemsByIdsRequest extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("itemIds")
-    private List<String> mItemIds;
-    
+    private final List<String> mItemIds;
+
     /**
      * Constructor to get published items from a topic by item ID's.
      * @param userId User ID of a user topic or null for global topic.
@@ -467,7 +469,7 @@ public class TopicAction {
       return GsonData.getGson().fromJson(json, ItemsByIdsRequest.class);
     }
   }
-  
+
   /**
    * @hide
    * Request payload for listing all topics with a specified limit.  If no
@@ -590,9 +592,9 @@ public class TopicAction {
     @SerializedName("userId")
     private String mUserId;
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("devId")
-    private String mDevId;
+    private final String mDevId;
     @SerializedName("errorOnDup")
     private boolean mErrorOnDup;
 
@@ -670,11 +672,11 @@ public class TopicAction {
    */
   public static class SubscribeResponse extends JSONifiable {
     @SerializedName("subscriptionId")
-    private String mSubId;
+    private final String mSubId;
     @SerializedName("code")
-    private int mCode;
+    private final int mCode;
     @SerializedName("msg")
-    private String mMsg;
+    private final String mMsg;
 
     /**
      * @hide
@@ -725,9 +727,9 @@ public class TopicAction {
     @SerializedName("userId")
     private String mUserId;
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("subscriptionId")
-    private String mSubId;
+    private final String mSubId;
 
     /**
      * Constructor for unsubscribing a global topic.
@@ -786,7 +788,7 @@ public class TopicAction {
    */
   public static class UnsubscribeForDevRequest extends JSONifiable {
     @SerializedName("devId")
-    private String mDevId;
+    private final String mDevId;
 
     /**
      * Default constructor.
@@ -815,7 +817,7 @@ public class TopicAction {
    */
   public static class SummaryRequest extends JSONifiable {
     @SerializedName("topicNodes")
-    private List<MMXTopicId> mTopics;
+    private final List<MMXTopicId> mTopics;
     @SerializedName("since")
     private Date mSince;
     @SerializedName("until")
@@ -828,25 +830,25 @@ public class TopicAction {
     public List<MMXTopicId> getTopicNodes() {
       return mTopics;
     }
-    
+
     public Date getSince() {
       return mSince;
     }
-    
+
     public SummaryRequest setSince(Date since) {
       mSince = since;
       return this;
     }
-    
+
     public Date getUntil() {
       return mUntil;
     }
-    
+
     public SummaryRequest setUntil(Date until) {
       mUntil = until;
       return this;
     }
-    
+
     public static SummaryRequest fromJson(String json) {
       return GsonData.getGson().fromJson(json, SummaryRequest.class);
     }
@@ -987,20 +989,23 @@ public class TopicAction {
     @SerializedName("operator")
     private Operator mOperator;
     @SerializedName("offset")
-    private int mOffset;
+    private final int mOffset;
     @SerializedName("limit")
     private int mLimit;
     @SerializedName("type")
-    private ListType mType;
+    private final ListType mType;
 
     public TopicSearchRequest(Operator operator, TopicSearch attr, int offset,
                                int limit, ListType type) {
-      if (attr == null)
+      if (attr == null) {
         throw new IllegalArgumentException("Search attribute cannot be null");
-      if ((mOperator = operator) == null)
+      }
+      if ((mOperator = operator) == null) {
         throw new IllegalArgumentException("Operator cannot be null");
-      if ((mLimit = limit) == 0)
+      }
+      if ((mLimit = limit) == 0) {
         throw new IllegalArgumentException("Limit cannot be 0");
+      }
       mOffset = offset;
       mType = (null == type) ? ListType.global : type;
       setTopicName(attr.getTopicName(), attr.getTopicNameMatch());
@@ -1050,9 +1055,9 @@ public class TopicAction {
     @SerializedName("criteria")
     private List<MMXAttribute<TopicAttr>> mCriteria = new ArrayList<MMXAttribute<TopicAttr>>();
     @SerializedName("offset")
-    private int mOffset;
+    private final int mOffset;
     @SerializedName("limit")
-    private int mLimit;
+    private final int mLimit;
 
     public TopicQueryRequest(List<MMXAttribute<TopicAttr>> criteria,
                               int offset, int limit) {
@@ -1089,8 +1094,8 @@ public class TopicAction {
     private int subscriptionCount;
     /**
      * @hide
-     * @param userId
-     * @param topic
+     * @param userId Owner ID of a user topic, or null for global topic.
+     * @param topic The topic name
      * @param isCollection
      */
     public TopicInfoWithSubscriptionCount(String userId, String topic, boolean isCollection) {
@@ -1116,9 +1121,9 @@ public class TopicAction {
    */
   public static class TopicQueryResponse extends JSONifiable {
     @SerializedName("total")
-    private int mTotal;
+    private final int mTotal;
     @SerializedName("results")
-    private List<TopicInfo> mResults;
+    private final List<TopicInfo> mResults;
 
     /**
      * @hide
@@ -1289,11 +1294,11 @@ public class TopicAction {
    */
   public static class FetchRequest extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("options")
-    private FetchOptions mOptions;
+    private final FetchOptions mOptions;
 
     public FetchRequest(String userId, String topic, FetchOptions options) {
       mUserId = userId;
@@ -1323,13 +1328,13 @@ public class TopicAction {
    */
   public static class MMXPublishedItem {
     @SerializedName("itemId")
-    private String mItemId;
+    private final String mItemId;
     @SerializedName("publisher")
-    private String mPublisher;
+    private final String mPublisher;
     @SerializedName("creationDate")
-    private Date mCreationDate;
+    private final Date mCreationDate;
     @SerializedName("payloadXML")
-    private String mPayloadXml;
+    private final String mPayloadXml;
 
     public MMXPublishedItem(String itemId, String publisher, Date creationDate,
                              String payloadXml) {
@@ -1362,13 +1367,13 @@ public class TopicAction {
    */
   public static class FetchResponse extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("totalCount")
-    private int mTotal;
+    private final int mTotal;
     @SerializedName("items")
-    private List<MMXPublishedItem> mItems;
+    private final List<MMXPublishedItem> mItems;
 
     /**
      * @hide
@@ -1404,23 +1409,23 @@ public class TopicAction {
       return GsonData.getGson().fromJson(json, FetchResponse.class);
     }
   }
-  
+
   /**
    * @hide
    * Request to get all subscribers from a topic.
    */
   public static class SubscribersRequest extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("topicName")
-    private String mTopic;
+    private final String mTopic;
     @SerializedName("limit")
-    private int mLimit;
+    private final int mLimit;
     @SerializedName("offset")
-    private int mOffset;
-    
+    private final int mOffset;
+
     /**
-     * 
+     *
      * @param userId Null for global topic, user ID for the user topic.
      * @param topic The topic name.
      * @param limit -1 for unlimited, or > 0.
@@ -1442,15 +1447,15 @@ public class TopicAction {
       this.mOffset = offset;
       mLimit = limit;
     }
-    
+
     public String getUserId() {
       return mUserId;
     }
-    
+
     public String getTopic() {
       return mTopic;
     }
-    
+
     public int getLimit() {
       return mLimit;
     }
@@ -1467,7 +1472,7 @@ public class TopicAction {
       return GsonData.getGson().fromJson(json, SubscribersRequest.class);
     }
   }
-  
+
   /**
    * @hide
    * Response of getting all subscribers to a topic.
@@ -1477,25 +1482,25 @@ public class TopicAction {
     private List<UserInfo> mSubscribers;
     @SerializedName("totalCount")
     private int mTotal;
-    
+
     public List<UserInfo> getSubscribers() {
       return mSubscribers;
     }
-    
+
     public SubscribersResponse setSubscribers(List<UserInfo> subscribers) {
       mSubscribers = subscribers;
       return this;
     }
-    
+
     public int getTotal() {
       return mTotal;
     }
-    
+
     public SubscribersResponse setTotal(int total) {
       mTotal = total;
       return this;
     }
-    
+
     public static SubscribersResponse fromJson(String json) {
       return GsonData.getGson().fromJson(json, SubscribersResponse.class);
     }

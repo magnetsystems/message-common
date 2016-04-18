@@ -17,13 +17,14 @@ package com.magnet.mmx.protocol;
 
 import com.google.gson.annotations.SerializedName;
 import com.magnet.mmx.util.GsonData;
+import com.magnet.mmx.util.TopicHelper;
 import com.magnet.mmx.util.Utils;
 
 /**
  * @hide
  * This class represents an identifier for a topic under the global name-space
  * or under a user name-space.  Under a global name-space, the topic name is
- * unique within the application.  Under a user name-space, topic name is unique 
+ * unique within the application.  Under a user name-space, topic name is unique
  * under a user ID within the application.
  */
 public class MMXTopicId implements MMXTopic {
@@ -41,8 +42,9 @@ public class MMXTopicId implements MMXTopic {
    * @param topic
    */
   public MMXTopicId(MMXTopic topic) {
-    if (topic == null)
+    if (topic == null) {
       throw new IllegalArgumentException("topic cannot be null");
+    }
     mUserId = topic.getUserId();
     mEscUserId = Utils.escapeNode(mUserId);
     mTopic = topic.getName();
@@ -54,8 +56,9 @@ public class MMXTopicId implements MMXTopic {
    * @param topic The topic name.
    */
   public MMXTopicId(String topic) {
-    if (topic == null || topic.isEmpty())
+    if (topic == null || topic.isEmpty()) {
       throw new IllegalArgumentException("topic name cannot be null or empty");
+    }
     mTopic = topic;
   }
 
@@ -66,8 +69,9 @@ public class MMXTopicId implements MMXTopic {
    * @param topic The topic name.
    */
   public MMXTopicId(String userId, String topic) {
-    if (topic == null || topic.isEmpty())
+    if (topic == null || topic.isEmpty()) {
       throw new IllegalArgumentException("topic name cannot be null or empty");
+    }
     mTopic = topic;
     mHashCode = mTopic.toLowerCase().hashCode();
     if (userId != null) {
@@ -87,11 +91,14 @@ public class MMXTopicId implements MMXTopic {
    * Get the friendly user ID of the personal topic.
    * @return A user ID of the personal topic or null for global topic.
    */
+  @Override
   public String getUserId() {
-    if (mEscUserId == null)
+    if (mEscUserId == null) {
       return null;
-    if (mUserId != null)
+    }
+    if (mUserId != null) {
       return mUserId;
+    }
     return mUserId = Utils.unescapeNode(mEscUserId);
   }
 
@@ -99,10 +106,11 @@ public class MMXTopicId implements MMXTopic {
    * Get the topic name.  The topic name is case insensitive.
    * @return The topic name.
    */
+  @Override
   public String getName() {
     return mTopic;
   }
-  
+
   /**
    * Get the escaped user ID.
    * @return
@@ -110,11 +118,12 @@ public class MMXTopicId implements MMXTopic {
   public String getEscUserId() {
     return mEscUserId;
   }
-  
+
   /**
    * Check if this topic is under a user name-space.
    * @return true if it is a user topic, false if it is a global topic.
    */
+  @Override
   public boolean isUserTopic() {
     return mEscUserId != null;
   }
@@ -124,24 +133,29 @@ public class MMXTopicId implements MMXTopic {
    * @param topic A topic to be matched
    * @return true if they are equals; otherwise, false.
    */
+  @Override
   public boolean equals(MMXTopic topic) {
-    if (topic == this)
+    if (topic == this) {
       return true;
-    if ((topic == null) || (getUserId() == null ^ topic.getUserId() == null))
+    }
+    if ((topic == null) || (getUserId() == null ^ topic.getUserId() == null)) {
       return false;
-    if ((mUserId != null) && !mUserId.equalsIgnoreCase(topic.getUserId()))
+    }
+    if ((mUserId != null) && !mUserId.equalsIgnoreCase(topic.getUserId())) {
       return false;
+    }
     return mTopic.equalsIgnoreCase(topic.getName());
   }
-  
+
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof MMXTopic))
+    if (!(obj instanceof MMXTopic)) {
       return false;
+    }
     MMXTopic topic = (MMXTopic) obj;
     return equals(topic);
   }
-  
+
   /**
    * Get the hash code based on the lower case of the topic name.
    */
@@ -152,19 +166,30 @@ public class MMXTopicId implements MMXTopic {
     }
     return mHashCode;
   }
-  
+
   /**
    * Get a string representation of this topic identifier.  Caller must ignore
    * the case of the string representation.
-   * @return A string in "&#42/topic" for global topic or "userID/topic" for user topic.
+   * @return A string in "topic" for global topic or "userID#topic" for user topic.
    * @see #parse(String)
    */
   @Override
   public String toString() {
     String userId = getUserId();
-    return (userId == null) ? "*/"+mTopic : userId+'/'+mTopic;
+    return (userId == null) ? mTopic : userId+TopicHelper.TOPIC_SEPARATOR+mTopic;
   }
-  
+
+  /**
+   * Get the topic ID.  The topic ID can be used in the URL path.  Currently the
+   * ID is derived from the name. TODO: decouple the ID from the topic name.
+   * @return The ID in the form of "[userID#]topicID".
+   */
+  public String getId() {
+    String userId = getUserId();
+    return (userId == null) ? mTopic.toLowerCase() :
+            userId+TopicHelper.TOPIC_SEPARATOR+mTopic.toLowerCase();
+  }
+
   /**
    * Convert a string representation of topic identifier to the object.
    * @param topicId The value from {@link #toString()}
@@ -172,15 +197,15 @@ public class MMXTopicId implements MMXTopic {
    * @see #toString()
    */
   public static MMXTopicId parse(String topicId) {
-    int slash = topicId.indexOf('/');
-    if ((slash == 1) && (topicId.charAt(0) == '*')) {
-      return new MMXTopicId(topicId.substring(slash+1));
-    } else if (slash >= 1) {
-      return new MMXTopicId(topicId.substring(0, slash), topicId.substring(slash+1));
+    int hash = topicId.indexOf(TopicHelper.TOPIC_SEPARATOR);
+    if (hash < 0) {
+      return new MMXTopicId(topicId);
+    } else if (hash > 0){
+      return new MMXTopicId(topicId.substring(0, hash), topicId.substring(hash+1));
     }
     throw new IllegalArgumentException("Not a valid topic format: "+topicId);
   }
-  
+
   /**
    * @hide
    */

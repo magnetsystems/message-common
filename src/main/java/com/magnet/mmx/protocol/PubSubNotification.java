@@ -19,7 +19,9 @@ import java.util.Date;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * The payload for PubSub wakeup (silent notifification) or push notification.
+ * The payload for PubSub wakeup (silent notification) or push notification.
+ * Any reserved properties (e.g. title, body, sound, badge) used by APNS can be
+ * added to this JSON payload.
  */
 public class PubSubNotification {
   @SerializedName("text")
@@ -28,41 +30,72 @@ public class PubSubNotification {
   private final MMXChannelId mChannel;
   @SerializedName("publishDate")
   private final Date mPublishDate;
+  @SerializedName("publisher")
+  private final MMXid mPublisher;
   @SerializedName("title")
   private final String mTitle;
   @SerializedName("body")
   private final String mBody;
+  @SerializedName("sound")
+  private final String mSound;
 
   /**
    * @hide
    * Constructor with a Channel object for wake-up (silent notification.)
    * @param channel The channel name.
-   * @param pubDate The oldest publish date of the new items.
+   * @param pubDate The oldest publish date among the new items.
+   * @param publisher The oldest publisher among the new items.
    * @param text Optional text message, or null
    */
-  public PubSubNotification(MMXChannelId channel, Date pubDate, String text) {
+  public PubSubNotification(MMXChannelId channel, Date pubDate, MMXid publisher,
+                            String text) {
     mChannel = channel;
     mPublishDate = pubDate;
+    mPublisher = publisher;
     mText = text;
     mTitle = null;
     mBody = null;
+    mSound = null;
   }
 
   /**
    * @hide
-   * Constructor with a Channel object for push notification.  The optional text
-   * will be set to the <code>title</code> for backward compatibility.
+   * Constructor with a Channel object for push notification without sound.  The
+   * optional text will be set to the <code>title</code> for backward
+   * compatibility.
    * @param channel The channel name.
    * @param pubDate The oldest publish date of the new items.
    * @param title A non-null title for push notification.
    * @param body An optional body for push notification.
    */
-  public PubSubNotification(MMXChannelId channel, Date pubDate, String title, String body) {
+  public PubSubNotification(MMXChannelId channel, Date pubDate, MMXid publisher,
+                            String title, String body) {
+    this(channel, pubDate, publisher, title, body, null);
+  }
+
+  /**
+   * @hide
+   * Constructor with a Channel object for push notification.  The optional text
+   * will be set to the <code>title</code> for backward compatibility.  If a
+   * sound name is specified in <code>sound</code>, it will be platform
+   * dependent.  It is recommended to use either "default" or null for
+   * portability.
+   * @param channel The channel name.
+   * @param pubDate The oldest publish date among the new items.
+   * @param publisher The oldest publisher among the new items.
+   * @param title A non-null title for push notification.
+   * @param body An optional body for push notification.
+   * @param sound "default", name-of-sound-file, or null.
+   */
+  public PubSubNotification(MMXChannelId channel, Date pubDate, MMXid publisher,
+                            String title, String body, String sound) {
     mChannel = channel;
     mPublishDate = pubDate;
+    mPublisher = publisher;
     mText = title;
     mTitle = title;
     mBody = body;
+    mSound = sound;
   }
 
   /**
@@ -71,22 +104,43 @@ public class PubSubNotification {
    * The Topic object will be converted to Channel object.
    * @param topic The topic name.
    * @param pubDate The oldest publish date of the new items.
+   * @param publisher The publisher.
    * @param text Optional text message, or null.
    */
-  public PubSubNotification(MMXTopicId topic, Date pubDate, String text) {
-    this(topic.toMMXChannelId(), pubDate, text);
+  public PubSubNotification(MMXTopicId topic, Date pubDate, MMXid publisher,
+                            String text) {
+    this(topic.toMMXChannelId(), pubDate, publisher, text);
   }
 
   /**
    * @hide
-   * Constructor with a lower Topic object for push notification.
+   * Constructor with a Topic object for push notification without sound.
    * @param topic The topic name
    * @param pubDate
+   * @param publisher
    * @param title
    * @param body
    */
-  public PubSubNotification(MMXTopicId topic, Date pubDate, String title, String body) {
-    this(topic.toMMXChannelId(), pubDate, title, body);
+  public PubSubNotification(MMXTopicId topic, Date pubDate, MMXid publisher,
+                            String title, String body) {
+    this(topic.toMMXChannelId(), pubDate, publisher, title, body, null);
+  }
+
+  /**
+   * @hide
+   * Constructor with a Topic object for push notification.  If a sound name
+   * is specified in <code>sound</code>, it will be platform dependent.  It is
+   * recommended to use either "default" or null for portability.
+   * @param topic The topic name
+   * @param pubDate
+   * @param publisher
+   * @param title
+   * @param body
+   * @param sound "default", sound-file-name, or null.
+   */
+  public PubSubNotification(MMXTopicId topic, Date pubDate, MMXid publisher,
+                            String title, String body, String sound) {
+    this(topic.toMMXChannelId(), pubDate, publisher, title, body, sound);
   }
 
   /**
@@ -124,11 +178,28 @@ public class PubSubNotification {
   }
 
   /**
-   * Get the published date of the new items.
-   * @return The published date of the new items.
+   * Get the published date of the new item.
+   * @return The published date of the new item.
    */
   public Date getPublishDate() {
     return mPublishDate;
+  }
+
+  /**
+   * Get the publisher of the new item.
+   * @return The publisher of the new item.
+   */
+  public MMXid getPublisher() {
+    return mPublisher;
+  }
+
+  /**
+   * Get the sound to be used for notification.  The value "default" is reserved
+   * for default notification sound.
+   * @return null or a sound file name.
+   */
+  public String getSound() {
+    return mSound;
   }
 
   /**

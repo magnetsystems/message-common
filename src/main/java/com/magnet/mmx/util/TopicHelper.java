@@ -80,7 +80,7 @@ public class TopicHelper {
   /**
    * @hide
    * Assuming that <code>topicId</code> is in the form of "/appId/*" or
-   * "/appId/userId", check if it is a user topic. 
+   * "/appId/userId", check if it is a user topic.
    * @param topicId
    * @return
    */
@@ -88,7 +88,7 @@ public class TopicHelper {
     int index = topicId.indexOf(TOPIC_DELIM, 1);
     return (index > 1) && (topicId.charAt(index+1) != TOPIC_FOR_APP);
   }
-  
+
   /**
    * Check if the topic with specified id is a topic for the passed in appId
    * @param topicId A path should be started with "/appId/".
@@ -127,7 +127,7 @@ public class TopicHelper {
       return false;
     }
   }
-  
+
   /**
    * Construct an application prefix for the topic.
    * @param appId
@@ -136,7 +136,7 @@ public class TopicHelper {
   public static String makePrefix(String appId) {
     return TOPIC_DELIM + appId + TOPIC_DELIM;
   }
-  
+
   /**
    * Parse an XMPP nodeID into a AppTopic object.  There are two formats:
    * /appID/*&#x002Ftopic for global topic and /appID/userID/topic for personal
@@ -145,21 +145,24 @@ public class TopicHelper {
    * @return An AppTopic object, or null if not an MMX topic.
    */
   public static AppTopic parseTopic(String topic) {
-    if (topic.charAt(0) != TOPIC_DELIM)
+    if (topic.charAt(0) != TOPIC_DELIM) {
       return null;
+    }
     int index1 = topic.indexOf(TOPIC_DELIM, 1);
-    if (index1 < 0)
+    if (index1 < 0) {
       return null;
+    }
     int index2 = topic.indexOf(TOPIC_DELIM, index1+1);
-    if (index2 < 0)
+    if (index2 < 0) {
       return null;
+    }
     String appId = topic.substring(1, index1);
     String userId = topic.substring(index1+1, index2);
     String topicName = topic.substring(index2+1);
     return new AppTopic(appId, (userId.charAt(0) == TOPIC_FOR_APP) ?
                       null : userId, topicName);
   }
-  
+
   /**
    * Parse an XMPP nodeID into a Topic ID object.  There are two formats:
    * /appID/*&#x002Ftopic for global topic and /appID/userID/topic for personal
@@ -168,20 +171,51 @@ public class TopicHelper {
    * @return A MMXTopicId, or null if not an MMX topic.
    */
   public static MMXTopicId parseNode(String nodeId) {
-    if (nodeId.charAt(0) != TOPIC_DELIM)
+    if (nodeId.charAt(0) != TOPIC_DELIM) {
       return null;
+    }
     int index1 = nodeId.indexOf(TOPIC_DELIM, 1);
-    if (index1 < 0)
+    if (index1 < 0) {
       return null;
+    }
     int index2 = nodeId.indexOf(TOPIC_DELIM, index1+1);
-    if (index2 < 0)
+    if (index2 < 0) {
       return null;
+    }
     String userId = nodeId.substring(index1+1, index2);
     String topicName = nodeId.substring(index2+1);
     return new MMXTopicId((userId.charAt(0) == TOPIC_FOR_APP) ?
         null : userId, topicName);
   }
-  
+
+  /**
+   * Convert an XMPP nodeID /appID/&asterisk;/topicID or /appID/userID/topicID
+   * into "topicID" or "userID#topicID."  This separates the dependency between
+   * topic name and topic ID.
+   * @param nodeId A XMPP PubSub nodeID string.
+   * @return A unique topic ID within an application, or null if not an MMX topic.
+   */
+  public static String convertToId(String nodeId) {
+    if (nodeId.charAt(0) != TOPIC_DELIM) {
+      return null;
+    }
+    int index1 = nodeId.indexOf(TOPIC_DELIM, 1);
+    if (index1 < 0) {
+      return null;
+    }
+    int index2 = nodeId.indexOf(TOPIC_DELIM, index1+1);
+    if (index2 < 0) {
+      return null;
+    }
+    String userId = nodeId.substring(index1+1, index2);
+    String topicId = nodeId.substring(index2+1);
+    if (userId.charAt(0) == TOPIC_FOR_APP) {
+      return topicId;
+    } else {
+      return userId + TOPIC_SEPARATOR + topicId;
+    }
+  }
+
   /**
    * @hide
    * Make a complete topic path.  There is a special root path if both userId
@@ -196,7 +230,7 @@ public class TopicHelper {
     if (userId == null && topic == null) {
       return appId;
     }
-    
+
     int len = appId.length() + 2;
     if (userId == null || userId.isEmpty()) {
       ++len;
@@ -214,7 +248,7 @@ public class TopicHelper {
       }
       len += topic.length();
     }
-    
+
     StringBuilder sb = new StringBuilder(len);
     sb.append(TOPIC_DELIM).append(appId).append(TOPIC_DELIM);
     if (userId == null) {
@@ -230,7 +264,7 @@ public class TopicHelper {
     }
     return sb.toString();
   }
-  
+
   /**
    * Construct the OS topic with an optional version.
    * @param os An OS type, or null for all OS's.
@@ -238,14 +272,16 @@ public class TopicHelper {
    * @return
    */
   public static String makeOSTopic(OSType os, String version) {
-    if (os == null)
+    if (os == null) {
       return TOPIC_OS_ROOT;
-    if (version == null)
+    }
+    if (version == null) {
       return TOPIC_OS + os.toString();
-    else
+    } else {
       return TOPIC_OS + os.toString() + TOPIC_DELIM + version;
+    }
   }
-  
+
   /**
    * @hide
    * Find the length of the prefix in the topic.  It is the third slash in the
@@ -259,10 +295,10 @@ public class TopicHelper {
     offset = path.indexOf(TOPIC_DELIM, offset+1);
     return ++offset;
   }
-  
+
   /**
    * @hide
-   * Get the parent full path of the topic.  The parent full path would be 
+   * Get the parent full path of the topic.  The parent full path would be
    * "/appId/userId/parent..." where the prefix is "/appId/userId/".
    * @param prefix The prefix length.
    * @param path The topic full path.
@@ -270,11 +306,12 @@ public class TopicHelper {
    */
   public static String getParent(int prefix, String path) {
     int offset = path.lastIndexOf(TOPIC_DELIM);
-    if (offset < prefix)
+    if (offset < prefix) {
       return null;
+    }
     return path.substring(0, offset);
   }
-  
+
   /**
    * Get the base name of the path.
    * @param path The full topic path
@@ -282,11 +319,12 @@ public class TopicHelper {
    */
   public static String getBaseName(String path) {
     int offset = path.lastIndexOf(TOPIC_DELIM);
-    if (offset < 0)
+    if (offset < 0) {
       return path;
+    }
     return path.substring(offset+1);
   }
-  
+
   /**
    * Get the root node ID from the path.  In the current implementation, it is
    * the app ID.
@@ -302,12 +340,12 @@ public class TopicHelper {
       return path.substring(start, offset);
     }
   }
-  
+
   /**
    * @hide
    * Normalize the topic path by collapsing all contiguous '/' and make it lower
    * case.  It also makes sure that topic cannot be null, empty, start or end
-   * with '/'. 
+   * with '/'.
    * @param path A topic path.
    * @return A normalized topic path.
    * @throws IllegalArgumentException Topic cannot be null or empty.
@@ -339,10 +377,10 @@ public class TopicHelper {
     }
     return sb.toString();
   }
-  
+
   /**
    * @hide
-   * Validate the topic name. 
+   * Validate the topic name.
    * @param topic A non-null topic with path syntax.
    * @throws IllegalArgumentException Topic cannot contain '/'.
    */
@@ -369,7 +407,7 @@ public class TopicHelper {
     }
     return false;
   }
-  
+
   public static void restrictPathSyntax(boolean restrict) {
     TOPIC_RESTRICTED_NAME = restrict;
   }
@@ -389,5 +427,38 @@ public class TopicHelper {
     }
     Matcher matcher = TOPIC_NAME_PATTERN.matcher(topicName);
     return matcher.matches();
+  }
+
+  /**
+   * The hack to fix MOB-2516 that allows the console to display user topics as
+   * userID#topicName.  This method parses the global topic or user topic properly.
+   * TODO: once the name and ID are decoupled, this method can be deprecated.
+   * @param topicName The form of "topicID" or "userID#topicID".
+   * @return
+   * @see #idToName(String, String)
+   */
+  public static MMXTopicId nameToId(String topicName) {
+    int index = topicName.indexOf(TOPIC_SEPARATOR);
+    if (index < 0) {
+      return new MMXTopicId(topicName);
+    } else {
+      return new MMXTopicId(topicName.substring(0, index), topicName.substring(index+1));
+    }
+  }
+
+  /**
+   * The hack to fix MOB-2516 to convert a user topic to userId#topicName.
+   * TODO: once the name and ID are decoupled, this method can be deprecated.
+   * @param userId
+   * @param topicName
+   * @return
+   * @see #nameToId(String)
+   */
+  public static String idToName(String userId, String topicName) {
+    if (userId == null) {
+      return topicName;
+    } else {
+      return userId + TOPIC_SEPARATOR + topicName;
+    }
   }
 }

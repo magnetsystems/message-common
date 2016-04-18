@@ -39,12 +39,20 @@ public class MmxHeaders extends Hashtable<String, Object> {
    */
   public final static String NO_ACK = "NoAck";
   /**
+   * Notify all devices of the publisher of the new items.
+   */
+  public final static String SELF_NOTIFICATION = "SelfNotification";
+  /**
+   * Optional push configuration name.
+   */
+  public final static String PUSH_CONFIG = "Push-Config-Name";
+  /**
    * A default constructor.
    */
   public MmxHeaders() {
     super();
   }
-  
+
   /**
    * A constructor with a default capacity.
    * @param capacity The initial capacity.
@@ -52,7 +60,7 @@ public class MmxHeaders extends Hashtable<String, Object> {
   public MmxHeaders(int capacity) {
     super(capacity);
   }
-  
+
   /**
    * A convenient method to set or remove a header with any JSONifiable value.
    * This is mainly used for mmxmeta stanza.  If <code>value</code> is null,
@@ -62,15 +70,17 @@ public class MmxHeaders extends Hashtable<String, Object> {
    * @return
    */
   public MmxHeaders setHeader(String key, Object value) {
-    if (key == null)
+    if (key == null) {
       throw new IllegalArgumentException("The key cannot be null");
-    if (value == null)
+    }
+    if (value == null) {
       remove(key);
-    else
+    } else {
       put(key, value);
+    }
     return this;
   }
-  
+
   /**
    * Get a header JSONifiable value with default.  This method is mainly used
    * with mmxmeta stanza.
@@ -79,15 +89,17 @@ public class MmxHeaders extends Hashtable<String, Object> {
    * @return A header value or the default value.
    */
   public Object getHeader(String key, Object defVal) {
-    if (key == null)
+    if (key == null) {
       throw new IllegalArgumentException("The key cannot be null");
+    }
     Object value;
-    if ((value = this.get(key)) == null)
+    if ((value = this.get(key)) == null) {
       return defVal;
-    else
+    } else {
       return value;
+    }
   }
-  
+
   /**
    * Set the TO header with the MMX ID's of recipients.  It is equivalent to
    * {@link #setHeader(String, Object)} with {@link #TO}.
@@ -97,7 +109,7 @@ public class MmxHeaders extends Hashtable<String, Object> {
   public MmxHeaders setTo(MMXid[] xids) {
     return setHeader(TO, xids);
   }
-  
+
   /**
    * Set the FROM header with the MMX ID of the sender.  It is equivalent to
    * {@link #setHeader(String, Object)} with {@link #FROM}.
@@ -116,5 +128,15 @@ public class MmxHeaders extends Hashtable<String, Object> {
    */
   public MmxHeaders setNoAck(boolean noAck) {
     return setHeader(NO_ACK, noAck ? Boolean.TRUE : Boolean.FALSE);
+  }
+
+  /**
+   * Enable or disable to send push notification to publisher's devices.
+   * Default is false.
+   * @param selfNotify true to enable; otherwise, false.
+   * @return
+   */
+  public MmxHeaders setSelfNotification(boolean selfNotify) {
+    return setHeader(SELF_NOTIFICATION, selfNotify ? Boolean.TRUE : Boolean.FALSE);
   }
 }

@@ -27,7 +27,11 @@ import java.util.Date;
 public class TopicInfo extends MMXTopicId implements MMXTopic {
   private static final long serialVersionUID = -5212539242296015590L;
   @SerializedName("isCollection")
-  private boolean mCollection;
+  private final boolean mCollection;
+  @SerializedName("topicId")
+  private String mId;
+  @SerializedName("displayName")
+  private String mDisplayName;
   @SerializedName("description")
   private String mDescription;
   @SerializedName("isPersistent")
@@ -46,11 +50,18 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   private String mCreator;
   @SerializedName("subscriptionEnabled")
   private boolean mSubscriptionEnabled;
-  
+
+  @SerializedName("isPushMutedByUser")
+  private boolean mPushMutedByUser;
+
+
   /**
    * @hide
-   * @param userId
-   * @param topic A topic name.
+   * Constructor for global topic or user topic.  The <code>topic</code> is the
+   * ID component in the nodeID which has a format of /appID/userID/ID or
+   * /appID/&asterisk;/ID, or the name of the topic.
+   * @param userId The owner ID of a user topic, or null for global topic.
+   * @param topic A topic ID or topic name.
    * @param isCollection
    */
   public TopicInfo(String userId, String topic, boolean isCollection) {
@@ -65,7 +76,44 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   public boolean isCollection() {
     return mCollection;
   }
-  
+
+  /**
+   * Get the ID of this topic info.
+   * @return The topic ID.
+   */
+  public String getId() {
+    return mId;
+  }
+
+  /**
+   * Set the ID for this topic info.  The ID is either in the form of "topicID"
+   * or "userID#topicID" which will be used in nodeID as
+   * /appID/&asterisk;/topicID or /appID/userID/topicID.
+   * @param id
+   * @return This object.
+   */
+  public TopicInfo setId(String id) {
+    mId = id;
+    return this;
+  }
+  /**
+   * Get an optional display name of this topic.
+   * @return Display name if available, or null if not available.
+   */
+  public String getDisplayName() {
+    return mDisplayName;
+  }
+
+  /**
+   * Set the topic display name.
+   * @param displayName The display name, or null.
+   * @return This object.
+   */
+  public TopicInfo setDisplayName(String displayName) {
+    mDisplayName = displayName;
+    return this;
+  }
+
   /**
    * Get the topic description.
    * @return The description, or null.
@@ -218,14 +266,35 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
     return this;
   }
 
+
+  /**
+   * Is push muted by user for this topic?
+   * @return
+   */
+  public boolean isPushMutedByUser() {
+    return mPushMutedByUser;
+  }
+
+  /**
+   * @param pushMutedByUser
+   * @return
+   */
+  public TopicInfo setPushMutedByUser(boolean pushMutedByUser) {
+    mPushMutedByUser = pushMutedByUser;
+    return this;
+  }
+
+
   /**
    * Get the topic information in string format for debug purpose.
    * @return Informative data about the topic.
    */
   @Override
   public String toString() {
-    return "[topic="+super.toString()+", desc="+mDescription+", sub="+mSubscriptionEnabled+
-        ", maxItems="+mMaxItems+", maxSize="+mMaxPayloadSize+", pubtype="+mPublisherType+
-        ", create="+mCreationDate+", mod="+mModifiedDate+"]";
+    return "[topic="+super.toString()+", id="+mId+", name="+mDisplayName+
+        ", desc="+mDescription+", sub="+mSubscriptionEnabled+
+        ", maxItems="+mMaxItems+", maxSize="+mMaxPayloadSize+
+        ", pubtype="+mPublisherType+", create="+mCreationDate+
+        ", mod="+mModifiedDate+"]";
   }
 }

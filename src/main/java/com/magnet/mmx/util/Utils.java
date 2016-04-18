@@ -110,6 +110,70 @@ public class Utils {
   }
 
   /**
+   * Set a static field by its name with a value.
+   * @param clz
+   * @param fieldName
+   * @return
+   * @throws NoSuchFieldException
+   * @throws SecurityException
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   */
+  public static Object getFieldValue(Class<?> clz, String fieldName)
+      throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+      IllegalAccessException {
+    boolean accessible;
+    Field field = clz.getDeclaredField(fieldName);
+    if (!(accessible = field.isAccessible())) {
+      field.setAccessible(true);
+    }
+    Object value = field.get(null);
+    if (!accessible) {
+      field.setAccessible(false);
+    }
+    return value;
+  }
+
+  /**
+   * Set a field by its name in an object with a value.
+   * @param obj
+   * @param fieldName
+   * @param value
+   * @throws NoSuchFieldException
+   * @throws SecurityException
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   */
+  public static void setFieldValue(Object obj, String fieldName, Object value)
+      throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+      IllegalAccessException {
+    boolean accessible;
+    Class<?> clz = obj.getClass();
+    Field field = clz.getDeclaredField(fieldName);
+    if (!(accessible = field.isAccessible())) {
+      field.setAccessible(true);
+    }
+    field.set(null, value);
+    if (!accessible) {
+      field.setAccessible(false);
+    }
+  }
+
+  public static void setFieldValue(Class<?> clz, String fieldName, Object value)
+      throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+      IllegalAccessException {
+    boolean accessible;
+    Field field = clz.getDeclaredField(fieldName);
+    if (!(accessible = field.isAccessible())) {
+      field.setAccessible(true);
+    }
+    field.set(null, value);
+    if (!accessible) {
+      field.setAccessible(false);
+    }
+  }
+
+  /**
    * Get a non-public (i.e. declared) static method from a class.
    * @param clz The class.
    * @param methodName A static method name.
