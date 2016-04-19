@@ -39,7 +39,7 @@ public class MmxHeaders extends Hashtable<String, Object> {
    */
   public final static String NO_ACK = "NoAck";
   /**
-   * Notify all devices of the publisher of the new items.
+   * Notify all devices of the publisher of the new items.  Default is false.
    */
   public final static String SELF_NOTIFICATION = "SelfNotification";
   /**
