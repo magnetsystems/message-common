@@ -49,7 +49,10 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   private String mCreator;
   @SerializedName("subscriptionEnabled")
   private boolean mSubscriptionEnabled;
-
+  @SerializedName("isPushMutedByUser")
+  private boolean mPushMutedByUser;
+  @SerializedName("pushMutedUntil")
+  private Date mPushMutedUntil;
   /**
    * @hide
    * @param userId
@@ -270,5 +273,36 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
         ", maxItems="+mMaxItems+", maxSize="+mMaxPayloadSize+
         ", pubtype="+mPublisherType+", create="+mCreationDate+
         ", mod="+mModifiedDate+"]";
+  }
+
+  /**
+   * Is push muted by user for this topic?
+   * @return
+   */
+  public boolean isPushMutedByUser() {
+    return mPushMutedByUser;
+  }
+
+  /**
+   * @param pushMutedByUser
+   * @return
+   */
+  public ChannelInfo setPushMutedByUser(boolean pushMutedByUser) {
+    mPushMutedByUser = pushMutedByUser;
+    return this;
+  }
+
+  /**
+   * Get the push muted until date if the channel is muted
+   * @return
+   */
+  public Date getPushMutedUntil() {
+    return mPushMutedUntil;
+  }
+
+
+  public ChannelInfo setPushMutedUntil(Date mPushMutedUntil) {
+    this.mPushMutedUntil = mPushMutedUntil;
+    return this;
   }
 }
