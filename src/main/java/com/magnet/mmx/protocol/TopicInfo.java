@@ -54,6 +54,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   @SerializedName("isPushMutedByUser")
   private boolean mPushMutedByUser;
 
+  @SerializedName("pushMutedUntil")
+  private Date mPushMutedUntil;
+
 
   /**
    * @hide
@@ -296,5 +299,20 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
         ", maxItems="+mMaxItems+", maxSize="+mMaxPayloadSize+
         ", pubtype="+mPublisherType+", create="+mCreationDate+
         ", mod="+mModifiedDate+"]";
+  }
+
+
+  /**
+   * Get the push muted until date if the channel is muted
+   * @return
+   */
+  public Date getPushMutedUntil() {
+    return mPushMutedUntil;
+  }
+
+
+  public TopicInfo setPushMutedUntil(Date mPushMutedUntil) {
+    this.mPushMutedUntil = mPushMutedUntil;
+    return this;
   }
 }
