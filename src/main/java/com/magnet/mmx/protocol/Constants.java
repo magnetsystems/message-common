@@ -73,16 +73,16 @@ public class Constants {
   public final static String MMX = MMX_ELEMENT;
   public final static String MMX_APP_REG = MMX_ELEMENT;
   public final static String MMX_DEV_REG = MMX_ELEMENT;
-  
+
   public final static String MMX_MMXMETA = "mmxmeta";
   public final static String MMX_META = "meta";
   public final static String MMX_PAYLOAD = "payload";
-  
+
   /**
    * The default encoding type to be used for binary payload.
    */
   public final static String BASE64 = "base64";
-  
+
   /**
    * The default message type if it is not specified or it is empty.
    */
@@ -95,7 +95,7 @@ public class Constants {
    * The message type for MMXError.
    */
   public final static String MMX_MTYPE_ERROR = "mmxerror";
-  
+
   // XEP-0184 message delivery receipts
   public final static String XMPP_REQUEST = "request";
   public final static String XMPP_RECEIVED = "received";
@@ -121,7 +121,7 @@ public class Constants {
 
   public final static String MMX_ACTION_CODE_WAKEUP = "w";
   public final static String MMX_ACTION_CODE_PUSH = "p";
-  
+
   /**
    * The attributes used in the MMX extension.
    */
@@ -157,7 +157,7 @@ public class Constants {
   public final static int STATUS_CODE_200 = 200;
   public final static int STATUS_CODE_400 = 400;
   public final static int STATUS_CODE_500 = 500;
-  
+
   /**
    * Commands for device management.
    */
@@ -170,7 +170,7 @@ public class Constants {
     ADDTAGS,
     REMOVETAGS,
   }
-  
+
   /**
    * Commands for application management.
    */
@@ -181,7 +181,7 @@ public class Constants {
     update,
     delete,
   }
-  
+
   /**
    * Commands for account (user) management.
    */
@@ -200,7 +200,7 @@ public class Constants {
     removeTags,
     searchByTags,
   }
-  
+
   /**
    * Commands for wake-up messages.
    */
@@ -285,7 +285,7 @@ public class Constants {
      */
     TIMEDOUT,
   }
-  
+
   /**
    * Commands for message management.  The setEvents/getEvents/addEvents/removeEvents
    * are applicable to push messages in PushManager.
@@ -300,9 +300,9 @@ public class Constants {
     setEvents,
     getEvents,
     addEvents,
-    removeEvents,    
+    removeEvents,
   }
-  
+
   /**
    * Commands for PubSub.
    */
@@ -461,6 +461,13 @@ public class Constants {
    * A partial display name for user's geo-location topic.
    */
   public static final String MMX_TOPIC_GEOLOCATION = "GeoLocation";
+  /**
+   * A special address prefix for MMX ad-hoc message to a node.  The bare JID is
+   * <code>node$nodeID%appID@domain</code> where nodeID contains an opaque ID.
+   * Currently the format of <code>nodeID</code> is "[userID#]nodeName", but it
+   * is subject to change.
+   */
+  public static final String MMX_NODE_PREFIX = "node$";
   /**
    * A special address for MMX multicast.  When a message has multiple
    * recipients, the message should be sent to this address.

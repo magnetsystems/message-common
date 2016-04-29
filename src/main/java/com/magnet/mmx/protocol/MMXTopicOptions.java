@@ -40,6 +40,8 @@ public class MMXTopicOptions implements Serializable {
   private PublisherType mPublisherType;
   @SerializedName("enableSubscription")
   private Boolean mSubscriptionEnabled;
+  @SerializedName("displayName")
+  private String mDisplayName;
   @SerializedName("description")
   private String mDescription;
   @SerializedName("subscribeOnCreate")
@@ -101,6 +103,24 @@ public class MMXTopicOptions implements Serializable {
    */
   public MMXTopicOptions setMaxItems(int maxItems) {
     mMaxItems = maxItems;
+    return this;
+  }
+
+  /**
+   * Get the display name.
+   * @return The display name.
+   */
+  public String getDisplayName() {
+    return mDisplayName;
+  }
+
+  /**
+   * Set the display name of the topic.
+   * @param displayName The display name of the topic.
+   * @return This object.
+   */
+  public MMXTopicOptions setDisplayName(String displayName) {
+    mDisplayName = displayName;
     return this;
   }
 
