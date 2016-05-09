@@ -462,10 +462,10 @@ public class Constants {
    */
   public static final String MMX_TOPIC_GEOLOCATION = "GeoLocation";
   /**
-   * A special address prefix for MMX ad-hoc message to a node.  The bare JID is
-   * <code>node$nodeID%appID@domain</code> where nodeID contains an opaque ID.
-   * Currently the format of <code>nodeID</code> is "[userID#]nodeName", but it
-   * is subject to change.
+   * A special address prefix for MMX ad-hoc message to a node.  The JID is
+   * <code>node$nodeID%appID@domain/resource</code> where nodeID contains an
+   * opaque ID.  Currently the format of <code>nodeID</code> is "[userID#]ID",
+   * but it is subject to change.
    */
   public static final String MMX_NODE_PREFIX = "node$";
   /**

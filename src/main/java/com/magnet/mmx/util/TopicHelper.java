@@ -461,4 +461,14 @@ public class TopicHelper {
       return userId + TOPIC_SEPARATOR + topicName;
     }
   }
+
+  public static String toNodeId(String appId, MMXTopicId topicId) {
+    String id = topicId.getId();
+    int hash = id.indexOf(TopicHelper.TOPIC_SEPARATOR);
+    if (hash <= 0) {
+      return makeTopic(appId, null, id);
+    } else {
+      return makeTopic(appId, id.substring(0, hash), id.substring(hash+1));
+    }
+  }
 }
