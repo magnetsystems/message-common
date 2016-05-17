@@ -19,12 +19,16 @@ package com.magnet.mmx.protocol;
  */
 public enum PushType {
   /**
-   * Token for the google cloud messaging
+   * Token for the Google Cloud Messaging
    */
   GCM,
   /**
-   * Token for apple push notification system
+   * Token for Apple Push Notification Service
    */
-  APNS
+  APNS,
+  /**
+   * Token for unsupported notification system
+   */
+  OTHERS,
   ;
 }
