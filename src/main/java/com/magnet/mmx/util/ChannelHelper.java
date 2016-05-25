@@ -191,26 +191,10 @@ public class ChannelHelper {
    * channel name and channel ID.
    * @param nodeId A XMPP PubSub nodeID string.
    * @return A unique channel ID within an application, or null if not an MMX channel.
+   * @deprecated #toChannelId(String)
    */
-  public static String converToId(String nodeId) {
-    if (nodeId.charAt(0) != CHANNEL_DELIM) {
-      return null;
-    }
-    int index1 = nodeId.indexOf(CHANNEL_DELIM, 1);
-    if (index1 < 0) {
-      return null;
-    }
-    int index2 = nodeId.indexOf(CHANNEL_DELIM, index1+1);
-    if (index2 < 0) {
-      return null;
-    }
-    String userId = nodeId.substring(index1+1, index2);
-    String channelId = nodeId.substring(index2+1);
-    if (userId.charAt(0) == CHANNEL_FOR_APP) {
-      return channelId;
-    } else {
-      return userId + CHANNEL_SEPARATOR + channelId;
-    }
+  public static String convertToId(String nodeId) {
+    return toChannelId(nodeId);
   }
 
   /**
@@ -452,11 +436,92 @@ public class ChannelHelper {
    * @return
    */
   public static String idToName(String userId, String channelName) {
-
       if (userId == null) {
           return channelName;
       } else {
           return userId + CHANNEL_SEPARATOR + channelName;
       }
+  }
+
+  /**
+   * Convert MMXChannelId into a pubsub node ID.  The internal ID must have
+   * the form of "ID" or "userID#ID".
+   * @param appId The app ID.
+   * @param channelId The channel ID object which must have the internal ID.
+   * @return A pubsub node ID.
+   * @see MMXChannelId#getId()
+   */
+  public static String toNodeId(String appId, MMXChannelId channelId) {
+    return toNodeId(appId, channelId.getId());
+  }
+
+  /**
+   * Convert a string format of channel ID into a pubsub node ID.
+   * @param appId The app ID.
+   * @param channelId The channel ID in the form of "ID" or "userID#ID".
+   * @return A pubsub node ID.
+   * @see MMXChannelId#getId()
+   */
+  public static String toNodeId(String appId, String channelId) {
+    int hash = channelId.indexOf(ChannelHelper.CHANNEL_SEPARATOR);
+    if (hash <= 0) {
+      return toNodeId(appId, null, channelId);
+    } else {
+      return toNodeId(appId, channelId.substring(0, hash), channelId.substring(hash+1));
+    }
+  }
+
+  /**
+   * Construct a pubsub node ID.  There is a special root node ID if both
+   * userId and id are null.  The node ID will be "appID",
+   * "/appID/&asterisk;/id", or "/appID/userID/id".
+   * @param appId The app ID.
+   * @param userId A user ID for user topic or null for global topic.
+   * @param id A unique id.
+   * @return A pubsub node ID.
+   */
+  public static String toNodeId(String appId, String userId, String id) {
+    if (userId == null && id == null) {
+      return appId;
+    }
+    if (userId == null || userId.isEmpty()) {
+      userId = CHANNEL_FOR_APP_STR;
+    } else {
+      userId = userId.toLowerCase();
+    }
+    StringBuilder sb = new StringBuilder(appId.length()+userId.length()+id.length()+3);
+    sb.append(CHANNEL_DELIM).append(appId)
+      .append(CHANNEL_DELIM).append(userId)
+      .append(CHANNEL_DELIM).append(id.toLowerCase());
+    return sb.toString();
+  }
+
+  /**
+   * Convert an XMPP pubsub node ID into a string form of channel ID.
+   * The pubsub node ID must have the form of /appID/&asterisk;/ID or
+   * /appID/userID/ID, and the channel ID will be in the form of "ID"
+   * or "userID#ID."
+   * @param nodeId An XMPP PubSub nodeID string.
+   * @return A string form of channel ID, or null if not a MMX channel.
+   */
+  public static String toChannelId(String nodeId) {
+    if (nodeId.charAt(0) != CHANNEL_DELIM) {
+      return null;
+    }
+    int index1 = nodeId.indexOf(CHANNEL_DELIM, 1);
+    if (index1 < 0) {
+      return null;
+    }
+    int index2 = nodeId.indexOf(CHANNEL_DELIM, index1+1);
+    if (index2 < 0) {
+      return null;
+    }
+    String userId = nodeId.substring(index1+1, index2);
+    String channelId = nodeId.substring(index2+1);
+    if (userId.charAt(0) == CHANNEL_FOR_APP) {
+      return channelId;
+    } else {
+      return userId + CHANNEL_SEPARATOR + channelId;
+    }
   }
 }

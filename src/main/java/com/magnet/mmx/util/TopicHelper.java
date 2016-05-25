@@ -190,30 +190,14 @@ public class TopicHelper {
 
   /**
    * Convert an XMPP nodeID /appID/&asterisk;/topicID or /appID/userID/topicID
-   * into "topicID" or "userID#topicID."  This separates the dependency between
-   * topic name and topic ID.
+   * into the string representation of topic ID which has two internal forms:
+   * "ID" or "userID#ID."
    * @param nodeId A XMPP PubSub nodeID string.
    * @return A unique topic ID within an application, or null if not an MMX topic.
+   * @deprecated Use #toTopicId(String)
    */
   public static String convertToId(String nodeId) {
-    if (nodeId.charAt(0) != TOPIC_DELIM) {
-      return null;
-    }
-    int index1 = nodeId.indexOf(TOPIC_DELIM, 1);
-    if (index1 < 0) {
-      return null;
-    }
-    int index2 = nodeId.indexOf(TOPIC_DELIM, index1+1);
-    if (index2 < 0) {
-      return null;
-    }
-    String userId = nodeId.substring(index1+1, index2);
-    String topicId = nodeId.substring(index2+1);
-    if (userId.charAt(0) == TOPIC_FOR_APP) {
-      return topicId;
-    } else {
-      return userId + TOPIC_SEPARATOR + topicId;
-    }
+    return toTopicId(nodeId);
   }
 
   /**
@@ -462,13 +446,85 @@ public class TopicHelper {
     }
   }
 
+  /**
+   * Convert MMXTopicId into a pubsub node ID.  The internal ID must have
+   * the form of "ID" or "userID#ID".
+   * @param appId The app ID.
+   * @param topciId The topic ID object which must have the internal ID.
+   * @return A pubsub node ID.
+   * @see MMXTopicId#getId()
+   */
   public static String toNodeId(String appId, MMXTopicId topicId) {
-    String id = topicId.getId();
-    int hash = id.indexOf(TopicHelper.TOPIC_SEPARATOR);
+    return toNodeId(appId, topicId.getId());
+  }
+
+  /**
+   * Convert a string format of topic ID into a pubsub node ID.
+   * @param appId The app ID.
+   * @param topicId The topic ID in the form of "ID" or "userID#ID".
+   * @return A pubsub node ID.
+   * @see MMXTopicId#getId()
+   */
+  public static String toNodeId(String appId, String topicId) {
+    int hash = topicId.indexOf(TopicHelper.TOPIC_SEPARATOR);
     if (hash <= 0) {
-      return makeTopic(appId, null, id);
+      return toNodeId(appId, null, topicId);
     } else {
-      return makeTopic(appId, id.substring(0, hash), id.substring(hash+1));
+      return toNodeId(appId, topicId.substring(0, hash), topicId.substring(hash+1));
+    }
+  }
+
+  /**
+   * Construct a pubsub node ID.  There is a special root node ID if both
+   * userId and id are null.  The node ID will be "appID",
+   * "/appID/&asterisk;/id", or "/appID/userID/id".
+   * @param appId The app ID.
+   * @param userId A user ID for user topic or null for global topic.
+   * @param id A unique id.
+   * @return A pubsub node ID.
+   */
+  public static String toNodeId(String appId, String userId, String id) {
+    if (userId == null && id == null) {
+      return appId;
+    }
+    if (userId == null || userId.isEmpty()) {
+      userId = TOPIC_FOR_APP_STR;
+    } else {
+      userId = userId.toLowerCase();
+    }
+    StringBuilder sb = new StringBuilder(appId.length()+userId.length()+id.length()+3);
+    sb.append(TOPIC_DELIM).append(appId)
+      .append(TOPIC_DELIM).append(userId)
+      .append(TOPIC_DELIM).append(id.toLowerCase());
+    return sb.toString();
+  }
+
+  /**
+   * Convert an XMPP pubsub node ID into a string form of topic ID.
+   * The pubsub node ID must have the form of /appID/&asterisk;/ID or
+   * /appID/userID/ID, and the topic ID will be in the form of "ID" or
+   * "userID#ID."
+   * @param nodeId A XMPP PubSub nodeID string.
+   * @return A string form of topic ID, or null if not an MMX topic.
+   */
+  public static String toTopicId(String nodeId) {
+    if (nodeId.charAt(0) != TOPIC_DELIM) {
+      return null;
+    }
+    int index1 = nodeId.indexOf(TOPIC_DELIM, 1);
+    if (index1 < 0) {
+      return null;
+    }
+    int index2 = nodeId.indexOf(TOPIC_DELIM, index1+1);
+    if (index2 < 0) {
+      return null;
+    }
+    String userId = nodeId.substring(index1+1, index2);
+    String topicId = nodeId.substring(index2+1);
+    if (userId.charAt(0) == TOPIC_FOR_APP) {
+      return topicId;
+    } else {
+      return userId + TOPIC_SEPARATOR + topicId;
     }
   }
 }
