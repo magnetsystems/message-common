@@ -28,10 +28,6 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   private static final long serialVersionUID = -5212539242296015590L;
   @SerializedName("isCollection")
   private final boolean mCollection;
-  @SerializedName("topicId")
-  private String mId;
-  @SerializedName("displayName")
-  private String mDisplayName;
   @SerializedName("description")
   private String mDescription;
   @SerializedName("isPersistent")
@@ -60,15 +56,14 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
 
   /**
    * @hide
-   * Constructor for global topic or user topic.  The <code>topic</code> is the
-   * ID component in the nodeID which has a format of /appID/userID/ID or
-   * /appID/&asterisk;/ID, or the name of the topic.
-   * @param userId The owner ID of a user topic, or null for global topic.
-   * @param topic A topic ID or topic name.
+   * Constructor for global topic or user topic.  The <code>topicId</code> is
+   * in the form of [userID#]ID as a transformed component in node ID.
+   * @param topicId Topic ID in the form of [userID#]ID.
+   * @param displayName The topic display name.
    * @param isCollection
    */
-  public TopicInfo(String userId, String topic, boolean isCollection) {
-    super(userId, topic);
+  public TopicInfo(String topicId, String displayName, boolean isCollection) {
+    super(topicId, displayName, null, null);
     mCollection = isCollection;
   }
 
@@ -78,43 +73,6 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
    */
   public boolean isCollection() {
     return mCollection;
-  }
-
-  /**
-   * Get the ID of this topic info.
-   * @return The topic ID.
-   */
-  public String getId() {
-    return mId;
-  }
-
-  /**
-   * Set the ID for this topic info.  The ID is either in the form of "topicID"
-   * or "userID#topicID" which will be used in nodeID as
-   * /appID/&asterisk;/topicID or /appID/userID/topicID.
-   * @param id
-   * @return This object.
-   */
-  public TopicInfo setId(String id) {
-    mId = id;
-    return this;
-  }
-  /**
-   * Get an optional display name of this topic.
-   * @return Display name if available, or null if not available.
-   */
-  public String getDisplayName() {
-    return mDisplayName;
-  }
-
-  /**
-   * Set the topic display name.
-   * @param displayName The display name, or null.
-   * @return This object.
-   */
-  public TopicInfo setDisplayName(String displayName) {
-    mDisplayName = displayName;
-    return this;
   }
 
   /**
@@ -128,11 +86,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   /**
    * Set the topic description.
    * @param description
-   * @return This object.
    */
-  public TopicInfo setDescription(String description) {
+  public void setDescription(String description) {
     mDescription = description;
-    return this;
   }
 
   /**
@@ -147,9 +103,8 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
    * @param persistent
    * @return
    */
-  public TopicInfo setPersistent(boolean persistent) {
+  public void setPersistent(boolean persistent) {
     mPersistent = persistent;
-    return this;
   }
 
   /**
@@ -163,11 +118,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   /**
    * @hide
    * @param maxItems
-   * @return
    */
-  public TopicInfo setMaxItems(int maxItems) {
+  public void setMaxItems(int maxItems) {
     mMaxItems = maxItems;
-    return this;
   }
 
   /**
@@ -181,11 +134,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   /**
    * @hide
    * @param maxPayloadSize
-   * @return
    */
-  public TopicInfo setMaxPayloadSize(int maxPayloadSize) {
+  public void setMaxPayloadSize(int maxPayloadSize) {
     mMaxPayloadSize = maxPayloadSize;
-    return this;
   }
 
   /**
@@ -198,11 +149,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
 
   /**
    * @param creationDate
-   * @return
    */
-  public TopicInfo setCreationDate(Date creationDate) {
+  public void setCreationDate(Date creationDate) {
     mCreationDate = creationDate;
-    return this;
   }
 
   /**
@@ -215,11 +164,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
 
   /**
    * @param modifiedDate
-   * @return
    */
-  public TopicInfo setModifiedDate(Date modifiedDate) {
+  public void setModifiedDate(Date modifiedDate) {
     mModifiedDate = modifiedDate;
-    return this;
   }
 
   /**
@@ -232,11 +179,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
 
   /**
    * @param publisherType
-   * @return
    */
-  public TopicInfo setPublisherType(PublisherType publisherType) {
+  public void setPublisherType(PublisherType publisherType) {
     mPublisherType = publisherType;
-    return this;
   }
 
   /**
@@ -247,9 +192,8 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
     return mCreator;
   }
 
-  public TopicInfo setCreator(String creator) {
+  public void setCreator(String creator) {
     mCreator = creator;
-    return this;
   }
 
   /**
@@ -264,9 +208,8 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
    * @param subscriptionEnabled
    * @return
    */
-  public TopicInfo setSubscriptionEnabled(boolean subscriptionEnabled) {
+  public void setSubscriptionEnabled(boolean subscriptionEnabled) {
     mSubscriptionEnabled = subscriptionEnabled;
-    return this;
   }
 
 
@@ -280,11 +223,9 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
 
   /**
    * @param pushMutedByUser
-   * @return
    */
-  public TopicInfo setPushMutedByUser(boolean pushMutedByUser) {
+  public void setPushMutedByUser(boolean pushMutedByUser) {
     mPushMutedByUser = pushMutedByUser;
-    return this;
   }
 
 
@@ -311,8 +252,7 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   }
 
 
-  public TopicInfo setPushMutedUntil(Date mPushMutedUntil) {
+  public void setPushMutedUntil(Date mPushMutedUntil) {
     this.mPushMutedUntil = mPushMutedUntil;
-    return this;
   }
 }

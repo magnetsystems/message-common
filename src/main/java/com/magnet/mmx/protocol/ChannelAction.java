@@ -59,11 +59,11 @@ public class ChannelAction {
    */
   public static class ChannelTags extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("tags")
-    private List<String> mTags;
+    private final List<String> mTags;
     @SerializedName("lastModTime")
     private Date mLastModTime;
     private transient MMXChannel mMMXChannel;
@@ -120,11 +120,12 @@ public class ChannelAction {
      * @return The channel.
      */
     public MMXChannel getChannel() {
-      if (mMMXChannel == null)
+      if (mMMXChannel == null) {
         mMMXChannel = new MMXChannelId(mUserId, mChannel);
+      }
       return mMMXChannel;
     }
-    
+
     /**
      * Get the tags.
      * @return A list of tags or an empty list.
@@ -162,15 +163,15 @@ public class ChannelAction {
    */
   public static class CreateRequest extends JSONifiable {
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("isPersonal")
-    private boolean mPersonal;
+    private final boolean mPersonal;
     @SerializedName("isCollection")
-    private boolean mCollection;
+    private final boolean mCollection;
     @SerializedName("options")
-    private MMXTopicOptions mOptions;
+    private final MMXTopicOptions mOptions;
     @SerializedName("roles")
-    private List<String> roles;
+    private final List<String> roles;
 
     /**
      * Default constructor.  A path-like channel name provides a simplified syntax
@@ -254,13 +255,37 @@ public class ChannelAction {
 
   /**
    * @hide
+   * Response payload for creating a channel.  The created channel has a unique
+   * ID.
+   */
+  public static class CreateResponse extends MMXStatus {
+    @SerializedName("channel")
+    private final MMXChannelId mChannelId;
+
+    public CreateResponse(MMXChannelId channelId) {
+      mChannelId = channelId;
+    }
+
+    public MMXChannelId getId() {
+      return mChannelId;
+    }
+
+    public static CreateResponse fromJson(String json) {
+      return GsonData.getGson().fromJson(json, CreateResponse.class);
+    }
+  }
+
+  /**
+   * @hide
    * Delete a channel and its children if it is a collection.
    */
   public static class DeleteRequest extends JSONifiable {
+    @SerializedName("channelId")
+    private final String mChannelId;
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("isPersonal")
-    private boolean mPersonal;
+    private final boolean mPersonal;
 
     /**
      * Default constructor for the channel deletion request.
@@ -268,6 +293,7 @@ public class ChannelAction {
      * @param isPersonal True for personal channel; false for global channel.
      */
     public DeleteRequest(String channel, boolean isPersonal) {
+      mChannelId = null;
       mChannel = channel;
       mPersonal = isPersonal;
     }
@@ -299,9 +325,9 @@ public class ChannelAction {
    */
   public static class RetractAllRequest extends JSONifiable {
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("isPersonal")
-    private boolean mPersonal;
+    private final boolean mPersonal;
 
     /**
      * Constructor to retract all published items from a personal channel or
@@ -334,11 +360,11 @@ public class ChannelAction {
    */
   public static class RetractRequest extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("itemIds")
-    private List<String> mItemIds;
+    private final List<String> mItemIds;
 
     /**
      * Constructor to retract published items from a channel.  The requester must
@@ -386,36 +412,36 @@ public class ChannelAction {
 
   public static class GetChannelsRequest extends ArrayList<MMXChannelId> {
     public GetChannelsRequest() {
-      super(); 
+      super();
     }
-    
+
     public static GetChannelsRequest fromJson(String json) {
       return GsonData.getGson().fromJson(json, GetChannelsRequest.class);
     }
   }
-  
+
   public static class GetChannelsResponse extends ArrayList<ChannelInfo> {
     public GetChannelsResponse() {
       super();
     }
-    
+
     public static GetChannelsResponse fromJson(String json) {
       return GsonData.getGson().fromJson(json, GetChannelsResponse.class);
     }
   }
-  
+
   /**
    * @hide
    * A request to access published items by ID's.
    */
   public static class ItemsByIdsRequest extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("itemIds")
-    private List<String> mItemIds;
-    
+    private final List<String> mItemIds;
+
     /**
      * Constructor to get published items from a channel by item ID's.
      * @param userId User ID of a user channel or null for global channel.
@@ -444,7 +470,7 @@ public class ChannelAction {
       return GsonData.getGson().fromJson(json, ItemsByIdsRequest.class);
     }
   }
-  
+
   /**
    * @hide
    * Request payload for listing all channels with a specified limit.  If no
@@ -566,9 +592,9 @@ public class ChannelAction {
     @SerializedName("userId")
     private String mUserId;
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("devId")
-    private String mDevId;
+    private final String mDevId;
     @SerializedName("errorOnDup")
     private boolean mErrorOnDup;
 
@@ -646,11 +672,11 @@ public class ChannelAction {
    */
   public static class SubscribeResponse extends JSONifiable {
     @SerializedName("subscriptionId")
-    private String mSubId;
+    private final String mSubId;
     @SerializedName("code")
-    private int mCode;
+    private final int mCode;
     @SerializedName("msg")
-    private String mMsg;
+    private final String mMsg;
 
     /**
      * @hide
@@ -701,9 +727,9 @@ public class ChannelAction {
     @SerializedName("userId")
     private String mUserId;
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("subscriptionId")
-    private String mSubId;
+    private final String mSubId;
 
     /**
      * Constructor for unsubscribing a global channel.
@@ -762,7 +788,7 @@ public class ChannelAction {
    */
   public static class UnsubscribeForDevRequest extends JSONifiable {
     @SerializedName("devId")
-    private String mDevId;
+    private final String mDevId;
 
     /**
      * Default constructor.
@@ -791,7 +817,7 @@ public class ChannelAction {
    */
   public static class SummaryRequest extends JSONifiable {
     @SerializedName("channelNodes")
-    private List<MMXChannelId> mChannels;
+    private final List<MMXChannelId> mChannels;
     @SerializedName("since")
     private Date mSince;
     @SerializedName("until")
@@ -804,25 +830,25 @@ public class ChannelAction {
     public List<MMXChannelId> getChannelNodes() {
       return mChannels;
     }
-    
+
     public Date getSince() {
       return mSince;
     }
-    
+
     public SummaryRequest setSince(Date since) {
       mSince = since;
       return this;
     }
-    
+
     public Date getUntil() {
       return mUntil;
     }
-    
+
     public SummaryRequest setUntil(Date until) {
       mUntil = until;
       return this;
     }
-    
+
     public static SummaryRequest fromJson(String json) {
       return GsonData.getGson().fromJson(json, SummaryRequest.class);
     }
@@ -972,9 +998,9 @@ public class ChannelAction {
     @SerializedName("criteria")
     private List<MMXAttribute<ChannelAttr>> mCriteria = new ArrayList<MMXAttribute<ChannelAttr>>();
     @SerializedName("offset")
-    private int mOffset;
+    private final int mOffset;
     @SerializedName("limit")
-    private int mLimit;
+    private final int mLimit;
 
     public ChannelQueryRequest(List<MMXAttribute<ChannelAttr>> criteria,
                               int offset, int limit) {
@@ -1038,9 +1064,9 @@ public class ChannelAction {
    */
   public static class ChannelQueryResponse extends JSONifiable {
     @SerializedName("total")
-    private int mTotal;
+    private final int mTotal;
     @SerializedName("results")
-    private List<ChannelInfo> mResults;
+    private final List<ChannelInfo> mResults;
 
     /**
      * @hide
@@ -1211,11 +1237,11 @@ public class ChannelAction {
    */
   public static class FetchRequest extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("options")
-    private FetchOptions mOptions;
+    private final FetchOptions mOptions;
 
     public FetchRequest(String userId, String channel, FetchOptions options) {
       mUserId = userId;
@@ -1245,13 +1271,13 @@ public class ChannelAction {
    */
   public static class MMXPublishedItem {
     @SerializedName("itemId")
-    private String mItemId;
+    private final String mItemId;
     @SerializedName("publisher")
-    private String mPublisher;
+    private final String mPublisher;
     @SerializedName("creationDate")
-    private Date mCreationDate;
+    private final Date mCreationDate;
     @SerializedName("payloadXML")
-    private String mPayloadXml;
+    private final String mPayloadXml;
 
     public MMXPublishedItem(String itemId, String publisher, Date creationDate,
                              String payloadXml) {
@@ -1284,13 +1310,13 @@ public class ChannelAction {
    */
   public static class FetchResponse extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("totalCount")
-    private int mTotal;
+    private final int mTotal;
     @SerializedName("items")
-    private List<MMXPublishedItem> mItems;
+    private final List<MMXPublishedItem> mItems;
 
     /**
      * @hide
@@ -1326,23 +1352,23 @@ public class ChannelAction {
       return GsonData.getGson().fromJson(json, FetchResponse.class);
     }
   }
-  
+
   /**
    * @hide
    * Request to get all subscribers from a channel.
    */
   public static class SubscribersRequest extends JSONifiable {
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("channelName")
-    private String mChannel;
+    private final String mChannel;
     @SerializedName("limit")
-    private int mLimit;
+    private final int mLimit;
     @SerializedName("offset")
-    private int mOffset;
-    
+    private final int mOffset;
+
     /**
-     * 
+     *
      * @param userId Null for global channel, user ID for the user channel.
      * @param channel The channel name.
      * @param limit -1 for unlimited, or > 0.
@@ -1364,15 +1390,15 @@ public class ChannelAction {
       this.mOffset = offset;
       mLimit = limit;
     }
-    
+
     public String getUserId() {
       return mUserId;
     }
-    
+
     public String getChannel() {
       return mChannel;
     }
-    
+
     public int getLimit() {
       return mLimit;
     }
@@ -1389,7 +1415,7 @@ public class ChannelAction {
       return GsonData.getGson().fromJson(json, SubscribersRequest.class);
     }
   }
-  
+
   /**
    * @hide
    * Response of getting all subscribers to a channel.
@@ -1399,25 +1425,25 @@ public class ChannelAction {
     private List<UserInfo> mSubscribers;
     @SerializedName("totalCount")
     private int mTotal;
-    
+
     public List<UserInfo> getSubscribers() {
       return mSubscribers;
     }
-    
+
     public SubscribersResponse setSubscribers(List<UserInfo> subscribers) {
       mSubscribers = subscribers;
       return this;
     }
-    
+
     public int getTotal() {
       return mTotal;
     }
-    
+
     public SubscribersResponse setTotal(int total) {
       mTotal = total;
       return this;
     }
-    
+
     public static SubscribersResponse fromJson(String json) {
       return GsonData.getGson().fromJson(json, SubscribersResponse.class);
     }

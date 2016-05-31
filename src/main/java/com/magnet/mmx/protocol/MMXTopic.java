@@ -24,24 +24,34 @@ import java.io.Serializable;
  */
 public interface MMXTopic extends Serializable {
   /**
+   * Return the unique ID (within the app) of the topic.  This ID should be
+   * sufficient to identify a topic within the current app.
+   * @return
+   */
+  public String getId();
+  /**
    * @hide
-   * Return the user ID under which the topic resides.  A topic in the user 
+   * Return the user ID under which the topic resides.  A topic in the user
    * name-space must have a unique name under the user.
    * @return A user ID for user topic, or null for global topic.
    */
   public String getUserId();
   /**
-   * Get the topic name.
-   * @return A topic name.
+   * Get the fully qualified name if available.
+   * @return A full topic name.
    */
   public String getName();
+  /**
+   * Get the display name of this topic.
+   * @return
+   */
+  public String getDisplayName();
   /**
    * @hide
    * Check if this topic is under the user name-space.
    * @return true if a user topic; otherwise, false.
    */
   public boolean isUserTopic();
-  
   /**
    * Check if two topics are equal.  The topic name is case insensitive.
    * @param topic A topic to be compared.

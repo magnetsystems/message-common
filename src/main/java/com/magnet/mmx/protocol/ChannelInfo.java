@@ -27,10 +27,6 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
 
   @SerializedName("isCollection")
   private final boolean mCollection;
-  @SerializedName("channelId")
-  private String mId;
-  @SerializedName("displayName")
-  private String mDisplayName;
   @SerializedName("description")
   private String mDescription;
   @SerializedName("isPersistent")
@@ -55,12 +51,12 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   private Date mPushMutedUntil;
   /**
    * @hide
-   * @param userId
-   * @param channel A channel name.
+   * @param id The channel unique ID.
+   * @param displayName A channel display name.
    * @param isCollection
    */
-  public ChannelInfo(String userId, String channel, boolean isCollection) {
-    super(userId, channel);
+  public ChannelInfo(String id, String displayName, boolean isCollection) {
+    super(id, displayName);
     mCollection = isCollection;
   }
 
@@ -73,41 +69,12 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   }
 
   /**
-   * Get the channel ID.
-   * @return The channel ID.
-   */
-  public String getId() {
-    return mId;
-  }
-
-  /**
-   * Set the ID for this channel info.  The ID is either in the form of
-   * "channelID" or "userID#channelID" which will be used in nodeID as
-   * /appID/&asterisk;/channelID or /appID/userID/channelID.
-   * @param id
-   * @return This object.
-   */
-  public ChannelInfo setId(String id) {
-    this.mId = id;
-    return this;
-  }
-
-  /**
    * Get the channel display name.
    * @return The display name.
    */
+  @Override
   public String getDisplayName() {
     return mDisplayName;
-  }
-
-  /**
-   * Set the channel display name.
-   * @param displayName The display name, or null.
-   * @return This object.
-   */
-  public ChannelInfo setDisplayName(String displayName) {
-    mDisplayName = displayName;
-    return this;
   }
 
   /**
@@ -121,11 +88,9 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   /**
    * Set the channel description.
    * @param description
-   * @return This object.
    */
-  public ChannelInfo setDescription(String description) {
+  public void setDescription(String description) {
     mDescription = description;
-    return this;
   }
 
   /**
@@ -140,9 +105,8 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
    * @param persistent
    * @return
    */
-  public ChannelInfo setPersistent(boolean persistent) {
+  public void setPersistent(boolean persistent) {
     mPersistent = persistent;
-    return this;
   }
 
   /**
@@ -156,11 +120,9 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   /**
    * @hide
    * @param maxItems
-   * @return
    */
-  public ChannelInfo setMaxItems(int maxItems) {
+  public void setMaxItems(int maxItems) {
     mMaxItems = maxItems;
-    return this;
   }
 
   /**
@@ -174,11 +136,9 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   /**
    * @hide
    * @param maxPayloadSize
-   * @return
    */
-  public ChannelInfo setMaxPayloadSize(int maxPayloadSize) {
+  public void setMaxPayloadSize(int maxPayloadSize) {
     mMaxPayloadSize = maxPayloadSize;
-    return this;
   }
 
   /**
@@ -191,11 +151,9 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
 
   /**
    * @param creationDate
-   * @return
    */
-  public ChannelInfo setCreationDate(Date creationDate) {
+  public void setCreationDate(Date creationDate) {
     mCreationDate = creationDate;
-    return this;
   }
 
   /**
@@ -210,9 +168,8 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
    * @param modifiedDate
    * @return
    */
-  public ChannelInfo setModifiedDate(Date modifiedDate) {
+  public void setModifiedDate(Date modifiedDate) {
     mModifiedDate = modifiedDate;
-    return this;
   }
 
   /**
@@ -227,9 +184,8 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
    * @param publisherType
    * @return
    */
-  public ChannelInfo setPublishPermission(TopicAction.PublisherType publisherType) {
+  public void setPublishPermission(TopicAction.PublisherType publisherType) {
     mPublisherType = publisherType;
-    return this;
   }
 
   /**
@@ -240,9 +196,8 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
     return mCreator;
   }
 
-  public ChannelInfo setCreator(String creator) {
+  public void setCreator(String creator) {
     mCreator = creator;
-    return this;
   }
 
   /**
@@ -257,9 +212,8 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
    * @param subscriptionEnabled
    * @return
    */
-  public ChannelInfo setSubscriptionEnabled(boolean subscriptionEnabled) {
+  public void setSubscriptionEnabled(boolean subscriptionEnabled) {
     mSubscriptionEnabled = subscriptionEnabled;
-    return this;
   }
 
   /**
@@ -268,11 +222,10 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
    */
   @Override
   public String toString() {
-    return "[channel="+super.toString()+", id="+mId+", name="+mDisplayName+
-        ", desc="+mDescription+", sub="+mSubscriptionEnabled+
-        ", maxItems="+mMaxItems+", maxSize="+mMaxPayloadSize+
-        ", pubtype="+mPublisherType+", create="+mCreationDate+
-        ", mod="+mModifiedDate+"]";
+    return "[channel="+super.toString()+", desc="+mDescription+
+        ", sub="+mSubscriptionEnabled+", maxItems="+mMaxItems+
+        ", maxSize="+mMaxPayloadSize+", pubtype="+mPublisherType+
+        ", create="+mCreationDate+", mod="+mModifiedDate+"]";
   }
 
   /**

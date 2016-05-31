@@ -18,7 +18,7 @@ package com.magnet.mmx.protocol;
 import com.google.gson.annotations.SerializedName;
 import com.magnet.mmx.util.ChannelHelper;
 import com.magnet.mmx.util.GsonData;
-import com.magnet.mmx.util.Utils;
+import com.magnet.mmx.util.TopicHelper;
 
 /**
  * @hide
@@ -28,52 +28,128 @@ import com.magnet.mmx.util.Utils;
  * under a user ID within the application.
  */
 public class MMXChannelId implements MMXChannel {
+  private static final long serialVersionUID = -6101018225170967229L;
   private transient int mHashCode;
-  protected transient String mUserId; // null or human readable user ID.
-  @SerializedName("channelName")
-  protected String mChannel;
+  @SerializedName("channelId")
+  protected String mId;
   @SerializedName("userId")
-  protected String mEscUserId; // null or XEP-0106 conformed user ID.
+  protected String mUserId;
+  @SerializedName("channelName")
+  protected String mName;
+  @SerializedName("displayName")
+  protected String mDisplayName;
 
-  MMXChannelId() {
+  /**
+   * Get a new instance from a pubsub node ID.
+   * @param nodeId Node ID from pubsub.
+   * @param displayName Optional display name.
+   * @return
+   */
+  public static MMXChannelId fromNodeId(String nodeId, String displayName) {
+    if (nodeId.charAt(0) != ChannelHelper.CHANNEL_DELIM) {
+      return null;
+    }
+    int index1 = nodeId.indexOf(ChannelHelper.CHANNEL_DELIM, 1);
+    if (index1 < 0) {
+      return null;
+    }
+    int index2 = nodeId.indexOf(ChannelHelper.CHANNEL_DELIM, index1+1);
+    if (index2 < 0) {
+      return null;
+    }
+    String userId = nodeId.substring(index1+1, index2);
+    String id = nodeId.substring(index2+1);
+    if (userId.charAt(0) == ChannelHelper.CHANNEL_FOR_APP) {
+      return MMXChannelId.fromId(id, displayName);
+    } else {
+      return MMXChannelId.fromId(userId + ChannelHelper.CHANNEL_SEPARATOR + id, displayName);
+    }
+  }
+
+  /**
+   * Get a new instance from an internal ID without display name.  It is
+   * equivalent to {@link #fromId(String, String)} with a null display name.
+   * @param id An internal ID.
+   * @return
+   */
+  public static MMXChannelId fromId(String id) {
+    return new MMXChannelId(id);
+  }
+
+  /**
+   * Get a new instance from an internal ID and display name.
+   * @param id An internal ID.
+   * @param displayName A display name.
+   * @return
+   */
+  public static MMXChannelId fromId(String id, String displayName) {
+    MMXChannelId channel = new MMXChannelId(id);
+    channel.setDisplayName(displayName);
+    return channel;
+  }
+
+  /**
+   * Get a new instance from the channel fully qualified name.
+   * @param userId Owner ID of a private channel, or null for public channel.
+   * @param name A fully qualified channel name.
+   * @return
+   */
+  public static MMXChannelId fromName(String userId, String name) {
+    return new MMXChannelId(userId, name);
+  }
+
+  public MMXChannelId() {
     // Used by MMXTopicId as a transformation.
   }
 
   /**
    * @hide
-   * Constructor for a global channel.  The channel name is case insensitive.
-   * @param channel The channel name.
+   * Constructor with the channel ID.  No qualified name is available.
+   * @param id The channel id.
    */
-  public MMXChannelId(String channel) {
-    if (channel == null || channel.isEmpty()) {
-      throw new IllegalArgumentException("channel name cannot be null or empty");
+  protected MMXChannelId(String id) {
+    if (id == null || id.isEmpty()) {
+      throw new IllegalArgumentException("Channel ID cannot be null or empty");
     }
-    mChannel = channel;
+    mName = null;
+    mDisplayName = null;
+    mId = id;
+    int hash = mId.indexOf(ChannelHelper.CHANNEL_SEPARATOR);
+    if (hash > 0) {
+      mUserId = mId.substring(0, hash);
+    } else {
+      mUserId = null;
+    }
   }
 
   /**
    * @hide
-   * Constructor for a user channel.  The channel name is case insensitive.
+   * Constructor with a fully qualified channel name.  The channel name is case
+   * insensitive.
    * @param userId The user ID in lower case of the user channel.
-   * @param channel The channel name.
+   * @param name The fully qualified channel name.
    */
-  public MMXChannelId(String userId, String channel) {
-    if (channel == null || channel.isEmpty()) {
-      throw new IllegalArgumentException("channel name cannot be null or empty");
+  protected MMXChannelId(String userId, String name) {
+    if (name == null || name.isEmpty()) {
+      throw new IllegalArgumentException("Channel name cannot be null or empty");
     }
-    mChannel = channel;
-    mHashCode = mChannel.toLowerCase().hashCode();
-    if (userId != null) {
-      if (userId.indexOf('@') >= 0) {
-        mUserId = userId;
-        mEscUserId = Utils.escapeNode(userId);
-      } else if (userId.indexOf('\\') >= 0) {
-        mEscUserId = userId;
-        mUserId = Utils.unescapeNode(userId);
-      } else {
-        mEscUserId = mUserId = userId;
-      }
+    mId = null;
+    mUserId = userId;
+    mName = name;
+    int slash = mName.lastIndexOf(ChannelHelper.CHANNEL_DELIM);
+    if (slash >= 0) {
+      mDisplayName = mName.substring(slash+1);
+    } else {
+      mDisplayName = mName;
     }
+  }
+
+  /**
+   * Set the display name when channel ID is used.
+   * @param displayName
+   */
+  protected void setDisplayName(String displayName) {
+    mDisplayName = displayName;
   }
 
   /**
@@ -82,22 +158,26 @@ public class MMXChannelId implements MMXChannel {
    */
   @Override
   public String getUserId() {
-    if (mEscUserId == null) {
-      return null;
-    }
-    if (mUserId != null) {
-      return mUserId;
-    }
-    return mUserId = Utils.unescapeNode(mEscUserId);
+    return mUserId;
   }
 
   /**
-   * Get the channel name.  The channel name is case insensitive.
-   * @return The channel name.
+   * Get the fully qualified channel name.  The fully qualified name is case
+   * insensitive.
+   * @return The channel fully qualified name.
    */
   @Override
   public String getName() {
-    return mChannel;
+    return mName;
+  }
+
+  /**
+   * Get the display name of this channel.  The display name is case sensitive.
+   * @return The channel display name.
+   */
+  @Override
+  public String getDisplayName() {
+    return mDisplayName;
   }
 
   /**
@@ -105,20 +185,31 @@ public class MMXChannelId implements MMXChannel {
    * @return
    */
   public String getEscUserId() {
-    return mEscUserId;
+    return mUserId;
   }
 
   /**
    * Check if this channel is under a user name-space.
    * @return true if it is a user channel, false if it is a global channel.
+   * @deprecated Use {@link #isPrivateChannel()}
    */
+  @Deprecated
   @Override
   public boolean isUserChannel() {
-    return mEscUserId != null;
+    return isPrivateChannel();
   }
 
   /**
-   * Check if two channels are equals.  The channel name is case insensitive.
+   * Check if this channel is under a private one under an owner.
+   * @return true if it is a private channel, false if it is a public channel.
+   */
+  public boolean isPrivateChannel() {
+    return mUserId != null;
+  }
+
+  /**
+   * Check if two channels are equals.  The channel fully qualified name is case
+   * insensitive.
    * @param channel A channel to be matched
    * @return true if they are equals; otherwise, false.
    */
@@ -127,13 +218,21 @@ public class MMXChannelId implements MMXChannel {
     if (channel == this) {
       return true;
     }
-    if ((channel == null) || (getUserId() == null ^ channel.getUserId() == null)) {
+    if ((channel == null) || (mId == null ^ channel.getId() == null)) {
       return false;
     }
-    if ((mUserId != null) && !mUserId.equalsIgnoreCase(channel.getUserId())) {
+    if (mId != null && !mId.equalsIgnoreCase(channel.getId())) {
       return false;
     }
-    return mChannel.equalsIgnoreCase(channel.getName());
+    if ((mUserId == null ^ channel.getUserId() == null) ||
+        (mUserId != null && !mUserId.equalsIgnoreCase(channel.getUserId()))) {
+      return false;
+    }
+    if ((mName == null ^ channel.getName() == null) ||
+        (mName != null && mName.equalsIgnoreCase(channel.getName()))) {
+      return false;
+    }
+    return true;
   }
 
   @Override
@@ -151,21 +250,22 @@ public class MMXChannelId implements MMXChannel {
   @Override
   public int hashCode() {
     if (mHashCode == 0) {
-      mHashCode = mChannel.toLowerCase().hashCode();
+      mHashCode = (mId != null) ? mId.hashCode() :
+        (mName.toLowerCase().hashCode() + ((mUserId != null) ? mUserId.hashCode() : 0));
     }
     return mHashCode;
   }
 
   /**
-   * Get a string representation of this channel identifier.  Caller must ignore
-   * the case of the string representation.
+   * Get a string representation of this channel identifier.
    * @return A string in "channel" for global channel or "userID#channel" for user channel.
    * @see #parse(String)
    */
   @Override
   public String toString() {
-    String userId = getUserId();
-    return (userId == null) ? mChannel : userId+ChannelHelper.CHANNEL_SEPARATOR+mChannel;
+    // TODO: for backward compatibility return the channel ID.
+    return getId();
+//    return "{ id="+mId+", userId="+mUserId+", name="+mName+" }";
   }
 
   /**
@@ -173,10 +273,10 @@ public class MMXChannelId implements MMXChannel {
    * the ID is derived from the name.  TODO: decouple the ID from the channel name.
    * @return The ID in the form of "[userID#]channelID".
    */
+  @Override
   public String getId() {
-    String userId = getUserId();
-    return (userId == null) ? mChannel.toLowerCase() :
-            userId+ChannelHelper.CHANNEL_SEPARATOR+mChannel.toLowerCase();  }
+    return mId;
+  }
 
   /**
    * Convert a string representation of channel identifier to the object.
@@ -185,13 +285,7 @@ public class MMXChannelId implements MMXChannel {
    * @see #toString()
    */
   public static MMXChannelId parse(String channelId) {
-    int hash = channelId.indexOf(ChannelHelper.CHANNEL_SEPARATOR);
-    if (hash < 0) {
-      return new MMXChannelId(channelId);
-    } else if (hash > 0) {
-      return new MMXChannelId(channelId.substring(0, hash), channelId.substring(hash+1));
-    }
-    throw new IllegalArgumentException("Not a valid channel format: "+channelId);
+    return new MMXChannelId(channelId);
   }
 
   /**

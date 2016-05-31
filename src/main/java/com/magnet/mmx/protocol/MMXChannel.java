@@ -24,6 +24,11 @@ import java.io.Serializable;
  */
 public interface MMXChannel extends Serializable {
   /**
+   * Get the unique channel ID (within an app).
+   * @return
+   */
+  public String getId();
+  /**
    * @hide
    * Return the user ID under which the channel resides.  A channel in the user
    * name-space must have a unique name under the user.
@@ -31,17 +36,22 @@ public interface MMXChannel extends Serializable {
    */
   public String getUserId();
   /**
-   * Get the channel name.
+   * Get the fully qualified channel name.
    * @return A channel name.
    */
   public String getName();
+  /**
+   * Get the display name of this channel node.
+   * @return
+   */
+  public String getDisplayName();
   /**
    * @hide
    * Check if this channel is under the user name-space.
    * @return true if a user channel; otherwise, false.
    */
   public boolean isUserChannel();
-  
+
   /**
    * Check if two channels are equal.  The channel name is case insensitive.
    * @param channel A channel to be compared.

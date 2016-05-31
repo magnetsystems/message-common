@@ -28,6 +28,7 @@ import com.magnet.mmx.protocol.SearchAction.Operator;
 import com.magnet.mmx.protocol.SearchAction.SingleValue;
 import com.magnet.mmx.util.GsonData;
 import com.magnet.mmx.util.JSONifiable;
+import com.magnet.mmx.util.TopicHelper;
 
 /**
  * This class represents the PubSub protocols and operations.
@@ -82,6 +83,8 @@ public class TopicAction {
    * The topic tags.
    */
   public static class TopicTags extends JSONifiable {
+    @SerializedName("topicId")
+    private final String mTopicId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("topicName")
@@ -95,12 +98,14 @@ public class TopicAction {
     /**
      * @hide
      * Constructor for the request of setting the tags.  Setting an empty list
-     * will remove all tags.
+     * will remove all tags.  Use either topicId or userId/topic.
+     * @param topicId A unique topic ID.
      * @param userId The user ID for a personal topic, null for global topic.
      * @param topic The topic name.
      * @param tags A list of tags or an empty list.
      */
-    public TopicTags(String userId, String topic, List<String> tags) {
+    public TopicTags(String topicId, String userId, String topic, List<String> tags) {
+      mTopicId = topicId;
       mUserId = userId;
       mTopic = topic;
       mTags = tags;
@@ -108,17 +113,30 @@ public class TopicAction {
 
     /**
      * @hide
-     * Constructor for the response of getting the tags.
+     * Constructor for the response of getting the tags.  Use either topicId
+     * or userId/topic.
+     * @param topicId A unique topic ID.
      * @param userId The user ID for a personal topic, null for global topic.
      * @param topic The topic name.
      * @param tags A list of tags or an empty list.
      * @param lastModTime The last modified time.
      */
-    public TopicTags(String userId, String topic, List<String> tags, Date lastModTime) {
+    public TopicTags(String topicId, String userId, String topic, List<String> tags,
+                     Date lastModTime) {
+      mTopicId = topicId;
       mUserId = userId;
       mTopic = topic;
       mTags = tags;
       mLastModTime = lastModTime;
+    }
+
+    /**
+     * @hide
+     * Get the unique topic ID.
+     * @return The topic ID.
+     */
+    public String getTopicId() {
+      return mTopicId;
     }
 
     /**
@@ -132,8 +150,8 @@ public class TopicAction {
 
     /**
      * @hide
-     * Get the topic name.
-     * @return A topic name.
+     * Get the fully qualified topic name.
+     * @return A fully qualified topic name.
      */
     public String getTopicName() {
       return mTopic;
@@ -145,7 +163,7 @@ public class TopicAction {
      */
     public MMXTopic getTopic() {
       if (mMMXTopic == null) {
-        mMMXTopic = new MMXTopicId(mUserId, mTopic);
+        mMMXTopic = MMXTopicId.fromName(mUserId, mTopic);
       }
       return mMMXTopic;
     }
@@ -279,34 +297,76 @@ public class TopicAction {
 
   /**
    * @hide
+   * Response payload for creating a topic.  The created topic has a unique
+   * ID.
+   */
+  public static class CreateResponse extends MMXStatus {
+    @SerializedName("topic")
+    private final MMXTopicId mTopicId;
+
+    public CreateResponse(MMXTopicId topicId) {
+      mTopicId = topicId;
+    }
+
+    public MMXTopicId getId() {
+      return mTopicId;
+    }
+
+    public static CreateResponse fromJson(String json) {
+      return GsonData.getGson().fromJson(json, CreateResponse.class);
+    }
+  }
+
+  /**
+   * @hide
    * Delete a topic and its children if it is a collection.
    */
   public static class DeleteRequest extends JSONifiable {
+    @SerializedName("topicId")
+    private final String mTopicId;
     @SerializedName("topicName")
     private final String mTopic;
     @SerializedName("isPersonal")
     private final boolean mPersonal;
 
     /**
-     * Default constructor for the topic deletion request.
-     * @param topic A path like topic name.
+     * Default constructor for the topic deletion request.  Caller should use
+     * either <code>topicId</code> or <code>topic</code>.  The
+     * <code>isPersonal</code> is only used with <code>topic</code>.
+     * @param topicId A unique topic ID.
+     * @param topic A fully qualified topic name.
      * @param isPersonal True for personal topic; false for global topic.
      */
-    public DeleteRequest(String topic, boolean isPersonal) {
-      mTopic = topic;
-      mPersonal = isPersonal;
+    public DeleteRequest(String topicId, String topic, boolean isPersonal) {
+      if (topicId != null) {
+        mTopicId = topicId;
+        mTopic = null;
+        mPersonal = TopicHelper.isUserTopicId(topicId);
+      } else {
+        mTopicId = null;
+        mTopic = topic;
+        mPersonal = isPersonal;
+      }
     }
 
     /**
-     * Get the topic name.
-     * @return The topic name.
+     * Get the topic ID.
+     * @return A unique token.
+     */
+    public String getTopicId() {
+      return mTopicId;
+    }
+
+    /**
+     * Get the topic fully qualified name.
+     * @return The topic fully qualified name.
      */
     public String getTopic() {
       return mTopic;
     }
 
     /**
-     * Check if the deleting topic is personal.
+     * Check if the deleting topic is personal.  Only valid with {@link #getTopic()}.
      * @return true for personal topic, false for global topic.
      */
     public boolean isPersonal() {
@@ -323,6 +383,8 @@ public class TopicAction {
    * Request payload for retracting all published items from the topic owner.
    */
   public static class RetractAllRequest extends JSONifiable {
+    @SerializedName("topicId")
+    private final String mTopicId;
     @SerializedName("topicName")
     private final String mTopic;
     @SerializedName("isPersonal")
@@ -334,9 +396,20 @@ public class TopicAction {
      * @param topic A path like topic name.
      * @param isPersonal true for a personal topic; false for global topic.
      */
-    public RetractAllRequest(String topic, boolean isPersonal) {
-      mTopic = topic;
-      mPersonal = isPersonal;
+    public RetractAllRequest(String topicId, String topic, boolean isPersonal) {
+      if (topicId != null) {
+        mTopicId = topicId;
+        mTopic = null;
+        mPersonal = TopicHelper.isUserTopicId(topicId);
+      } else {
+        mTopicId = null;
+        mTopic = topic;
+        mPersonal = isPersonal;
+      }
+    }
+
+    public String getTopicId() {
+      return mTopicId;
     }
 
     public String getTopic() {
@@ -358,6 +431,8 @@ public class TopicAction {
    * must have proper permission to remove the items.
    */
   public static class RetractRequest extends JSONifiable {
+    @SerializedName("topicId")
+    private final String mTopicId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("topicName")
@@ -367,15 +442,22 @@ public class TopicAction {
 
     /**
      * Constructor to retract published items from a topic.  The requester must
-     * have permission to retract the published items.
+     * have permission to retract the published items.  Use either topicId or
+     * userId/topic.
+     * @param topicId A unique topic ID.
      * @param userId User ID of a personal topic or null for global topic.
      * @param topic A path like topic name.
      * @param itemIds Published item ID's to be retracted.
      */
-    public RetractRequest(String userId, String topic, List<String> itemIds) {
+    public RetractRequest(String topicId, String userId, String topic, List<String> itemIds) {
+      mTopicId = topicId;
       mUserId = userId;
       mTopic = topic;
       mItemIds = itemIds;
+    }
+
+    public String getTopicId() {
+      return mTopicId;
     }
 
     public String getUserId() {
@@ -434,6 +516,8 @@ public class TopicAction {
    * A request to access published items by ID's.
    */
   public static class ItemsByIdsRequest extends JSONifiable {
+    @SerializedName("topicId")
+    private final String mTopicId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("topicName")
@@ -443,14 +527,20 @@ public class TopicAction {
 
     /**
      * Constructor to get published items from a topic by item ID's.
+     * @param topicId A unique topic ID.
      * @param userId User ID of a user topic or null for global topic.
      * @param topic A path like topic name.
      * @param itemIds Published item ID's.
      */
-    public ItemsByIdsRequest(String userId, String topic, List<String> itemIds) {
+    public ItemsByIdsRequest(String topicId, String userId, String topic, List<String> itemIds) {
+      mTopicId = topicId;
       mUserId = userId;
       mTopic = topic;
       mItemIds = itemIds;
+    }
+
+    public String getTopicId() {
+      return mTopicId;
     }
 
     public String getUserId() {
@@ -589,8 +679,10 @@ public class TopicAction {
    * @hide
    */
   public static class SubscribeRequest extends JSONifiable {
+    @SerializedName("topicId")
+    private final String mTopicId;
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("topicName")
     private final String mTopic;
     @SerializedName("devId")
@@ -599,25 +691,21 @@ public class TopicAction {
     private boolean mErrorOnDup;
 
     /**
-     * Subscription request for a global topic.
+     * Subscription request to a global or user topic.
+     * @param topicId A unique topic ID.
+     * @param userId The user ID of a user topic, null for global topic.
      * @param topic The topic name.
      * @param devId A device ID for this subscription or null for all devices.
      */
-    public SubscribeRequest(String topic, String devId) {
+    public SubscribeRequest(String topicId, String userId, String topic, String devId) {
+      mTopicId = topicId;
+      mUserId = userId;
       mTopic = topic;
       mDevId = devId;
     }
 
-    /**
-     * Subscription request for a personal topic.
-     * @param userId The user ID of a personal topic.
-     * @param topic The topic name.
-     * @param devId A device ID for this subscription or null for all devices.
-     */
-    public SubscribeRequest(String userId, String topic, String devId) {
-      mUserId = userId;
-      mTopic = topic;
-      mDevId = devId;
+    public String getTopicId() {
+      return mTopicId;
     }
 
     /**
@@ -724,33 +812,31 @@ public class TopicAction {
    * @hide
    */
   public static class UnsubscribeRequest extends JSONifiable {
+    @SerializedName("topicId")
+    private final String mTopicId;
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("topicName")
     private final String mTopic;
     @SerializedName("subscriptionId")
     private final String mSubId;
 
     /**
-     * Constructor for unsubscribing a global topic.
+     * Constructor for un-subscribing a global or user topic.
+     * @param topicId A unique topic ID.
+     * @param userId The user ID of a user topic, or null for global topic.
      * @param topic The topic name.
      * @param subId A subscription ID or null for all subscriptions to the topic.
      */
-    public UnsubscribeRequest(String topic, String subId) {
+    public UnsubscribeRequest(String topicId, String userId, String topic, String subId) {
+      mTopicId = topicId;
+      mUserId = userId;
       mTopic = topic;
       mSubId = subId;
     }
 
-    /**
-     * Constructor for unsubscribing a personal topic.
-     * @param userId The user ID of a personal topic.
-     * @param topic The topic name.
-     * @param subId A subscription ID or null for all subscriptions to the topic.
-     */
-    public UnsubscribeRequest(String userId, String topic, String subId) {
-      mUserId = userId;
-      mTopic = topic;
-      mSubId = subId;
+    public String getTopicId() {
+      return mTopicId;
     }
 
     /**
@@ -1094,12 +1180,12 @@ public class TopicAction {
     private int subscriptionCount;
     /**
      * @hide
-     * @param userId Owner ID of a user topic, or null for global topic.
-     * @param topic The topic name
+     * @param id An opaque topic ID.
+     * @param displayName The topic display name
      * @param isCollection
      */
-    public TopicInfoWithSubscriptionCount(String userId, String topic, boolean isCollection) {
-      super(userId, topic, isCollection);
+    public TopicInfoWithSubscriptionCount(String id, String displayName, boolean isCollection) {
+      super(id, displayName, isCollection);
     }
 
     /**
@@ -1293,6 +1379,8 @@ public class TopicAction {
    * Request payload for fetching published items from a topic.
    */
   public static class FetchRequest extends JSONifiable {
+    @SerializedName("topicId")
+    private final String mTopicId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("topicName")
@@ -1300,7 +1388,8 @@ public class TopicAction {
     @SerializedName("options")
     private final FetchOptions mOptions;
 
-    public FetchRequest(String userId, String topic, FetchOptions options) {
+    public FetchRequest(String topicId, String userId, String topic, FetchOptions options) {
+      mTopicId = topicId;
       mUserId = userId;
       mTopic = topic;
       mOptions = options;
@@ -1366,10 +1455,10 @@ public class TopicAction {
    * Response payload for fetching published items.
    */
   public static class FetchResponse extends JSONifiable {
-    @SerializedName("userId")
-    private final String mUserId;
-    @SerializedName("topicName")
-    private final String mTopic;
+    @SerializedName("topicId")
+    private final String mTopicId;
+    @SerializedName("displayName")
+    private final String mDisplayName;
     @SerializedName("totalCount")
     private final int mTotal;
     @SerializedName("items")
@@ -1377,24 +1466,24 @@ public class TopicAction {
 
     /**
      * @hide
-     * @param userId
-     * @param topic
+     * @param topicId
+     * @param displayName
      * @param items
      */
-    public FetchResponse(String userId, String topic, int total,
+    public FetchResponse(String topicId, String displayName, int total,
         List<MMXPublishedItem> items) {
-      mUserId = userId;
-      mTopic = topic;
+      mTopicId = topicId;
+      mDisplayName = displayName;
       mTotal = total;
       mItems = items;
     }
 
-    public String getUserId() {
-      return mUserId;
+    public String getTopicId() {
+      return mTopicId;
     }
 
-    public String getTopic() {
-      return mTopic;
+    public String getDisplayName() {
+      return mDisplayName;
     }
 
     public List<MMXPublishedItem> getItems() {
@@ -1415,6 +1504,8 @@ public class TopicAction {
    * Request to get all subscribers from a topic.
    */
   public static class SubscribersRequest extends JSONifiable {
+    @SerializedName("topicId")
+    private final String mTopicId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("topicName")
@@ -1430,8 +1521,8 @@ public class TopicAction {
      * @param topic The topic name.
      * @param limit -1 for unlimited, or > 0.
      */
-    public SubscribersRequest(String userId, String topic, int limit) {
-      this(userId, topic, 0, limit);
+    public SubscribersRequest(String topicId, String userId, String topic, int limit) {
+      this(topicId, userId, topic, 0, limit);
     }
 
     /**
@@ -1441,11 +1532,16 @@ public class TopicAction {
      * @param offset
      * @param limit -1 for unlimited, or > 0.
      */
-    public SubscribersRequest(String userId, String topic, int offset, int limit) {
+    public SubscribersRequest(String topicId, String userId, String topic, int offset, int limit) {
+      mTopicId = topicId;
       mUserId = userId;
       mTopic = topic;
       this.mOffset = offset;
       mLimit = limit;
+    }
+
+    public String getTopicId() {
+      return mTopicId;
     }
 
     public String getUserId() {
