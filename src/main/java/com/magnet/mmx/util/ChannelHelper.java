@@ -17,7 +17,6 @@ package com.magnet.mmx.util;
 
 import com.magnet.mmx.protocol.*;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -39,9 +38,6 @@ public class ChannelHelper {
   public final static String CHANNEL_OS = CHANNEL_OS_ROOT+CHANNEL_DELIM;    // a collection node
   public final static String CHANNEL_LEAF_ALL = TopicHelper.TOPIC_LEAF_ALL; // a leaf node
   public final static String CHANNEL_NAME_PATTERN_STRING = TopicHelper.TOPIC_NAME_PATTERN_STRING;
-
-  private static final Pattern CHANNEL_NAME_PATTERN = Pattern.compile(CHANNEL_NAME_PATTERN_STRING);
-
 
   // the node is formulated as follows:
   // /<appId>/*/com.magnet.os/<osType>
@@ -168,9 +164,21 @@ public class ChannelHelper {
    * it is the app ID.
    * @param nodeId The pubsub node ID.
    * @return The root component in node ID.
+   * @deprecated Use {@link #getAppId(String)}
    */
+  @Deprecated
   public static String getRootNodeId(String nodeId) {
     return TopicHelper.getRootNodeId(nodeId);
+  }
+
+  /**
+   * Get the root component from the node ID.  In the current implementation,
+   * it is the app ID.
+   * @param nodeId
+   * @return
+   */
+  public static String getAppId(String nodeId) {
+    return TopicHelper.getAppId(nodeId);
   }
 
   /**

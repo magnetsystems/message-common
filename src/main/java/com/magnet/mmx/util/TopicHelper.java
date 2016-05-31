@@ -164,6 +164,7 @@ public class TopicHelper {
     return new AppTopic(appId, (userId.charAt(0) == TOPIC_FOR_APP) ?
                       null : userId, id);
   }
+
   /**
    * Construct the OS topic with an optional version.
    * @param os An OS type, or null for all OS's.
