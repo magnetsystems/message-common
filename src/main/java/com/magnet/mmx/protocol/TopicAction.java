@@ -1395,6 +1395,10 @@ public class TopicAction {
       mOptions = options;
     }
 
+    public String getTopicId() {
+      return mTopicId;
+    }
+
     public String getUserId() {
       return mUserId;
     }

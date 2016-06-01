@@ -29,9 +29,9 @@ public class SendLastPublishedItems extends JSONifiable {
   @SerializedName("topic")
   private MMXTopicId mTopic;
   @SerializedName("since")
-  private Date mSince;
+  private final Date mSince;
   @SerializedName("maxItems")
-  private int mMaxItems;
+  private final int mMaxItems;
 
   /**
    * Constructor to request for published items of all subscribed topics

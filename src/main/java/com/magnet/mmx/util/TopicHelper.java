@@ -227,16 +227,36 @@ public class TopicHelper {
    * @return The app ID.
    */
   public static String getAppId(String nodeId) {
-    int start = (nodeId.charAt(0) == TOPIC_DELIM) ? 1 : 0;
-    if (start == 0) {
+    if (nodeId.charAt(0) != TOPIC_DELIM) {
       return nodeId;
     }
-    int offset = nodeId.indexOf(TOPIC_DELIM, start);
+    int offset = nodeId.indexOf(TOPIC_DELIM, 1);
     if (offset < 0) {
-      return nodeId.substring(start);
+      return nodeId.substring(1);
     } else {
-      return nodeId.substring(start, offset);
+      return nodeId.substring(1, offset);
     }
+  }
+
+  /**
+   * Get the user ID from node ID.
+   * @param nodeId The pubsub node ID.
+   * @return The user ID for user topic, or null for global topic.
+   */
+  public static String getUserId(String nodeId) {
+    if (nodeId.charAt(0) != TOPIC_DELIM) {
+      // It is the app root node.
+      return null;
+    }
+    int index1 = nodeId.indexOf(TOPIC_DELIM, 1);
+    if (index1 < 0) {
+      // Malformed node ID.
+      return null;
+    }
+    int index2 = nodeId.indexOf(TOPIC_DELIM, ++index1);
+    String userId = (index2 < 0) ?
+        nodeId.substring(index1) : nodeId.substring(index1, index2);
+    return (userId.charAt(0) == TOPIC_FOR_APP) ? null : userId;
   }
 
   /**
