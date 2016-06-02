@@ -73,7 +73,7 @@ public class MMXChannelId implements MMXChannel {
    * @return
    */
   public static MMXChannelId fromId(String id) {
-    return new MMXChannelId(id);
+    return new MMXChannelId(id, null, null, null);
   }
 
   /**
@@ -83,8 +83,7 @@ public class MMXChannelId implements MMXChannel {
    * @return
    */
   public static MMXChannelId fromId(String id, String displayName) {
-    MMXChannelId channel = new MMXChannelId(id);
-    channel.setDisplayName(displayName);
+    MMXChannelId channel = new MMXChannelId(id, displayName, null, null);
     return channel;
   }
 
@@ -104,21 +103,31 @@ public class MMXChannelId implements MMXChannel {
 
   /**
    * @hide
-   * Constructor with the channel ID.  No qualified name is available.
-   * @param id The channel id.
+   * Specify id/displayName, userId/name or both.  The last component in the
+   * <code>name</code> is also the display name.  If id/displayName are used,
+   * the fully qualified name won't be available.  If both pairs are used, the
+   * id/displayName will have higher precedence.
+   * @param id A unique topic ID.
+   * @param displayName Optional display name.
+   * @param userId Owner ID of a private channel, null for public channel.
+   * @param name A path-like fully qualified name.
    */
-  protected MMXChannelId(String id) {
-    if (id == null || id.isEmpty()) {
-      throw new IllegalArgumentException("Channel ID cannot be null or empty");
+  public MMXChannelId(String id, String displayName, String userId, String name) {
+    mDisplayName = displayName;
+    mUserId = userId;
+    if (((mName = name) != null) && (mDisplayName == null)) {
+      int slash = mName.lastIndexOf(ChannelHelper.CHANNEL_DELIM);
+      if (slash >= 0) {
+        mDisplayName = mName.substring(slash+1);
+      } else {
+        mDisplayName = mName;
+      }
     }
-    mName = null;
-    mDisplayName = null;
-    mId = id;
-    int hash = mId.indexOf(ChannelHelper.CHANNEL_SEPARATOR);
-    if (hash > 0) {
-      mUserId = mId.substring(0, hash);
-    } else {
-      mUserId = null;
+    if (((mId = id) != null) && (mUserId == null)) {
+      int hash = mId.indexOf(ChannelHelper.CHANNEL_SEPARATOR);
+      if (hash > 0) {
+        mUserId = mId.substring(0, hash);
+      }
     }
   }
 
@@ -129,7 +138,7 @@ public class MMXChannelId implements MMXChannel {
    * @param userId The user ID in lower case of the user channel.
    * @param name The fully qualified channel name.
    */
-  protected MMXChannelId(String userId, String name) {
+  public MMXChannelId(String userId, String name) {
     if (name == null || name.isEmpty()) {
       throw new IllegalArgumentException("Channel name cannot be null or empty");
     }
