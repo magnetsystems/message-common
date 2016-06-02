@@ -77,7 +77,7 @@ public class MMXTopicId implements MMXTopic {
   /**
    * Get a new instance from a unique id and display name.
    * @param id An internal ID format.
-   * @param displayName
+   * @param displayName Optional display name.
    * @return
    */
   public static MMXTopicId fromId(String id, String displayName) {
@@ -122,14 +122,15 @@ public class MMXTopicId implements MMXTopic {
   /**
    * @hide
    * Specify id/displayName, userId/name or both.  The last component in the
-   * <code>name</code> is also the display name.
+   * <code>name</code> is also the display name.  If id/displayName are used,
+   * the fully qualified name won't be available.  If both pairs are used, the
+   * id/displayName will have higher precedence.
    * @param id A unique topic ID.
    * @param displayName Optional display name.
    * @param userId Owner ID of a user topic, null for global topic.
    * @param name A path-like fully qualified name.
    */
-  protected MMXTopicId(String id, String displayName, String userId, String name) {
-    mId = id;
+  public MMXTopicId(String id, String displayName, String userId, String name) {
     mDisplayName = displayName;
     mUserId = userId;
     if (((mName = name) != null) && (mDisplayName == null)) {
@@ -140,26 +141,13 @@ public class MMXTopicId implements MMXTopic {
         mDisplayName = mName;
       }
     }
+    if (((mId = id) != null) && (mUserId == null)) {
+      int hash = mId.indexOf(TopicHelper.TOPIC_SEPARATOR);
+      if (hash > 0) {
+        mUserId = mId.substring(0, hash);
+      }
+    }
   }
-
-//  /**
-//   * @hide
-//   * Constructor with the topic ID.  No qualified name is available.  This
-//   * constructor is only used by the client if the ID is known.
-//   * @param topic The topic id.
-//   */
-//  protected MMXTopicId(String id) {
-//    if (id == null || id.isEmpty()) {
-//      throw new IllegalArgumentException("ID cannot be null or empty");
-//    }
-//    mId = id;
-//    int hash = mId.indexOf(TopicHelper.TOPIC_SEPARATOR);
-//    if (hash > 0) {
-//      mUserId = mId.substring(0, hash);
-//    }
-//    mName = null;
-//    mDisplayName = null;
-//  }
 
   /**
    * @hide
@@ -169,7 +157,7 @@ public class MMXTopicId implements MMXTopic {
    * @param userId The user ID in lower case of the user topic.
    * @param name The topic fully qualified name.
    */
-  protected MMXTopicId(String userId, String name) {
+  public MMXTopicId(String userId, String name) {
     if (name == null || name.isEmpty()) {
       throw new IllegalArgumentException("Topic name cannot be null or empty");
     }
@@ -182,14 +170,6 @@ public class MMXTopicId implements MMXTopic {
     } else {
       mDisplayName = mName;
     }
-  }
-
-  protected void setId(String id) {
-    this.mId = id;
-  }
-
-  protected void setDisplayName(String displayName) {
-    this.mDisplayName = displayName;
   }
 
   /**

@@ -572,7 +572,7 @@ public class TopicAction {
     private int mOffset;
     @SerializedName("recursive")
     private boolean mRecursive = true;
-    @SerializedName("topicName")
+    @SerializedName("topicId")
     private String mStart;
     @SerializedName("type")
     private ListType mType;
@@ -621,8 +621,8 @@ public class TopicAction {
     }
 
     /**
-     * Set the starting point.  Default is from the root.
-     * @param start
+     * Set the starting point.  Default is from the app root node.
+     * @param start The starting topic ID.
      * @return This object.
      */
     public ListRequest setStart(String start) {
@@ -630,6 +630,10 @@ public class TopicAction {
       return this;
     }
 
+    /**
+     * Get the specified starting point topic ID.
+     * @return
+     */
     public String getStart() {
       return mStart;
     }
@@ -638,6 +642,12 @@ public class TopicAction {
       return mType;
     }
 
+    /**
+     * List global, personal or both topics.  It is only applicable if the
+     * starting point topic ID is null.
+     * @param type
+     * @return
+     */
     public ListRequest setType(ListType type) {
       mType = type;
       return this;

@@ -53,6 +53,19 @@ public class TopicInfo extends MMXTopicId implements MMXTopic {
   @SerializedName("pushMutedUntil")
   private Date mPushMutedUntil;
 
+  /**
+   * Constructor for global topic or user topic with full path.
+   * @param topicId
+   * @param displayName
+   * @param userId
+   * @param name
+   * @param isCollection
+   */
+  public TopicInfo(String topicId, String displayName, String userId,
+                   String name, boolean isCollection) {
+    super(topicId, displayName, userId, name);
+    mCollection = isCollection;
+  }
 
   /**
    * @hide
