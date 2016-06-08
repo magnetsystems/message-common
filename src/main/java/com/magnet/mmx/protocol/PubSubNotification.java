@@ -38,6 +38,8 @@ public class PubSubNotification {
   private final String mBody;
   @SerializedName("sound")
   private final String mSound;
+  @SerializedName("badge")
+  private final Integer mBadge;
 
   /**
    * @hide
@@ -56,6 +58,7 @@ public class PubSubNotification {
     mTitle = null;
     mBody = null;
     mSound = null;
+    mBadge = null;
   }
 
   /**
@@ -67,10 +70,11 @@ public class PubSubNotification {
    * @param pubDate The oldest publish date of the new items.
    * @param title A non-null title for push notification.
    * @param body An optional body for push notification.
+   * @param badge An optional badge for push notification.
    */
   public PubSubNotification(MMXChannelId channel, Date pubDate, MMXid publisher,
-                            String title, String body) {
-    this(channel, pubDate, publisher, title, body, null);
+                            String title, String body, Integer badge) {
+    this(channel, pubDate, publisher, title, body, null, badge);
   }
 
   /**
@@ -86,9 +90,10 @@ public class PubSubNotification {
    * @param title A non-null title for push notification.
    * @param body An optional body for push notification.
    * @param sound "default", name-of-sound-file, or null.
+   * @param badge An option badge for push notification.
    */
   public PubSubNotification(MMXChannelId channel, Date pubDate, MMXid publisher,
-                            String title, String body, String sound) {
+                            String title, String body, String sound, Integer badge) {
     mChannel = channel;
     mPublishDate = pubDate;
     mPublisher = publisher;
@@ -96,6 +101,7 @@ public class PubSubNotification {
     mTitle = title;
     mBody = body;
     mSound = sound;
+    mBadge = badge;
   }
 
   /**
@@ -120,10 +126,11 @@ public class PubSubNotification {
    * @param publisher
    * @param title
    * @param body
+   * @param badge
    */
   public PubSubNotification(MMXTopicId topic, Date pubDate, MMXid publisher,
-                            String title, String body) {
-    this(topic.toMMXChannelId(), pubDate, publisher, title, body, null);
+                            String title, String body, Integer badge) {
+    this(topic.toMMXChannelId(), pubDate, publisher, title, body, null, badge);
   }
 
   /**
@@ -139,8 +146,8 @@ public class PubSubNotification {
    * @param sound "default", sound-file-name, or null.
    */
   public PubSubNotification(MMXTopicId topic, Date pubDate, MMXid publisher,
-                            String title, String body, String sound) {
-    this(topic.toMMXChannelId(), pubDate, publisher, title, body, sound);
+                            String title, String body, String sound, Integer badge) {
+    this(topic.toMMXChannelId(), pubDate, publisher, title, body, sound, badge);
   }
 
   /**
@@ -208,5 +215,13 @@ public class PubSubNotification {
    */
   public static String getType() {
     return Constants.PingPongCommand.pubsub.toString();
+  }
+
+  /**
+   * Get the badge to be used for notification.
+   * @return null if not used; otherwise, a number.
+   */
+  public Integer getBadge() {
+    return mBadge;
   }
 }
