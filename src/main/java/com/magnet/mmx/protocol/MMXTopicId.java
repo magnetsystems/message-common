@@ -267,14 +267,13 @@ public class MMXTopicId implements MMXTopic {
 
   /**
    * Get a string representation of this topic identifier for debug purpose.
-   * Currently it returns {@link #getId()} for backward compatibility.
    * @return A topic in string.
    */
   @Override
   public String toString() {
-//  return "{ id="+mId+", userId="+mUserId+", name="+mName+" }";
-    // TODO: for backward compatibility?
-    return getId();
+  return "{ id="+mId+", dname="+mDisplayName+", userId="+mUserId+", name="+mName+" }";
+//    // TODO: for backward compatibility?
+//    return getId();
   }
 
   /**

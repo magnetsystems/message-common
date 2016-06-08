@@ -20,6 +20,7 @@ import com.magnet.mmx.protocol.SearchAction.Match;
 import com.magnet.mmx.protocol.SearchAction.MultiValues;
 import com.magnet.mmx.protocol.SearchAction.Operator;
 import com.magnet.mmx.protocol.SearchAction.SingleValue;
+import com.magnet.mmx.util.ChannelHelper;
 import com.magnet.mmx.util.GsonData;
 import com.magnet.mmx.util.JSONifiable;
 
@@ -58,6 +59,8 @@ public class ChannelAction {
    * The channel tags.
    */
   public static class ChannelTags extends JSONifiable {
+    @SerializedName("channelId")
+    private final String mChannelId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("channelName")
@@ -65,36 +68,51 @@ public class ChannelAction {
     @SerializedName("tags")
     private final List<String> mTags;
     @SerializedName("lastModTime")
-    private Date mLastModTime;
-    private transient MMXChannel mMMXChannel;
+    private final Date mLastModTime;
 
     /**
      * @hide
      * Constructor for the request of setting the tags.  Setting an empty list
      * will remove all tags.
+     * @param channelId
      * @param userId The user ID for a personal channel, null for global channel.
-     * @param channel The channel name.
+     * @param channel The channel fully qualified name.
      * @param tags A list of tags or an empty list.
      */
-    public ChannelTags(String userId, String channel, List<String> tags) {
-      mUserId = userId;
-      mChannel = channel;
-      mTags = tags;
+    public ChannelTags(String channelId, List<String> tags) {
+      this(channelId, null, null, tags, null);
+    }
+
+    /**
+     * Constructor for the request of setting the tags with last modified time.
+     * Setting an empty list will remove all tags.
+     * @param channelId
+     * @param tags
+     * @param lastModTime
+     */
+    public ChannelTags(String channelId, List<String> tags, Date lastModTime) {
+      this(channelId, null, null, tags, lastModTime);
     }
 
     /**
      * @hide
      * Constructor for the response of getting the tags.
      * @param userId The user ID for a personal channel, null for global channel.
-     * @param channel The channel name.
+     * @param channel The channel fully qualified name.
      * @param tags A list of tags or an empty list.
      * @param lastModTime The last modified time.
      */
-    public ChannelTags(String userId, String channel, List<String> tags, Date lastModTime) {
+    public ChannelTags(String channelId, String userId, String channel,
+                        List<String> tags, Date lastModTime) {
+      mChannelId = channelId;
       mUserId = userId;
       mChannel = channel;
       mTags = tags;
       mLastModTime = lastModTime;
+    }
+
+    public String getChannelId() {
+      return mChannelId;
     }
 
     /**
@@ -108,22 +126,11 @@ public class ChannelAction {
 
     /**
      * @hide
-     * Get the channel name.
-     * @return A channel name.
+     * Get the channel fully qualified name.
+     * @return A channel fully qualified name.
      */
     public String getChannelName() {
       return mChannel;
-    }
-
-    /**
-     * Get the channel associated with these tags.
-     * @return The channel.
-     */
-    public MMXChannel getChannel() {
-      if (mMMXChannel == null) {
-        mMMXChannel = new MMXChannelId(mUserId, mChannel);
-      }
-      return mMMXChannel;
     }
 
     /**
@@ -288,14 +295,30 @@ public class ChannelAction {
     private final boolean mPersonal;
 
     /**
-     * Default constructor for the channel deletion request.
-     * @param channel A path like channel name.
-     * @param isPersonal True for personal channel; false for global channel.
+     * Constructor for channel deletion request by channel ID.
+     * @param channelId
      */
-    public DeleteRequest(String channel, boolean isPersonal) {
-      mChannelId = null;
-      mChannel = channel;
-      mPersonal = isPersonal;
+    public DeleteRequest(String channelId) {
+      mChannelId = channelId;
+      mChannel = null;
+      mPersonal = ChannelHelper.isUserChannelId(channelId);
+    }
+
+//    /**
+//     * Constructor for the channel deletion request.
+//     * @param channel A channel fully qualified name.
+//     * @param isPersonal True for personal channel; false for global channel.
+//     * @deprecated Use {@link #DeleteRequest(String)}
+//     */
+//    @Deprecated
+//    public DeleteRequest(String channel, boolean isPersonal) {
+//      mChannelId = null;
+//      mChannel = channel;
+//      mPersonal = isPersonal;
+//    }
+
+    public String getChannelId() {
+      return mChannelId;
     }
 
     /**
@@ -321,23 +344,43 @@ public class ChannelAction {
 
   /**
    * @hide
-   * Request payload for retracting all published items from the channel owner.
+   * Request payload for deleting all items from a channel by the channel owner.
    */
   public static class RetractAllRequest extends JSONifiable {
+    @SerializedName("channelId")
+    private final String mChannelId;
     @SerializedName("channelName")
     private final String mChannel;
     @SerializedName("isPersonal")
     private final boolean mPersonal;
 
     /**
+     * Constructor to delete all items from a channel by the channel ID.  Only
+     * the owner can perform this operation.
+     * @param channelId
+     */
+    public RetractAllRequest(String channelId) {
+      mChannelId = channelId;
+      mChannel = null;
+      mPersonal = ChannelHelper.isUserChannelId(channelId);
+    }
+
+    /**
      * Constructor to retract all published items from a personal channel or
      * global channel owned by the requester.
-     * @param channel A path like channel name.
+     * @param channel A channel fully qualified name.
      * @param isPersonal true for a personal channel; false for global channel.
+     * @deprecated Use {@link #RetractAllRequest(String)}
      */
+    @Deprecated
     public RetractAllRequest(String channel, boolean isPersonal) {
+      mChannelId = null;
       mChannel = channel;
       mPersonal = isPersonal;
+    }
+
+    public String getChannelId() {
+      return mChannelId;
     }
 
     public String getChannel() {
@@ -359,6 +402,8 @@ public class ChannelAction {
    * must have proper permission to remove the items.
    */
   public static class RetractRequest extends JSONifiable {
+    @SerializedName("channelId")
+    private final String mChannelId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("channelName")
@@ -367,16 +412,35 @@ public class ChannelAction {
     private final List<String> mItemIds;
 
     /**
+     * Constructor to retrace published items from a channel.
+     * @param channelId The channel ID.
+     * @param itemIds A list of published item ID's to be retracted.
+     */
+    public RetractRequest(String channelId, List<String> itemIds) {
+      mChannelId = channelId;
+      mUserId = null;
+      mChannel = null;
+      mItemIds = itemIds;
+    }
+
+    /**
      * Constructor to retract published items from a channel.  The requester must
      * have permission to retract the published items.
      * @param userId User ID of a personal channel or null for global channel.
      * @param channel A path like channel name.
      * @param itemIds Published item ID's to be retracted.
+     * @deprecated Use {@link #RetractRequest(String, List)}
      */
+    @Deprecated
     public RetractRequest(String userId, String channel, List<String> itemIds) {
+      mChannelId = null;
       mUserId = userId;
       mChannel = channel;
       mItemIds = itemIds;
+    }
+
+    public String getChannelId() {
+      return mChannelId;
     }
 
     public String getUserId() {
@@ -435,6 +499,8 @@ public class ChannelAction {
    * A request to access published items by ID's.
    */
   public static class ItemsByIdsRequest extends JSONifiable {
+    @SerializedName("channelId")
+    private final String mChannelId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("channelName")
@@ -443,15 +509,33 @@ public class ChannelAction {
     private final List<String> mItemIds;
 
     /**
+     * Constructor to get published items from a channel ID by item ID's.
+     * @param channelId A channel ID.
+     * @param itemIds Published item ID's.
+     */
+    public ItemsByIdsRequest(String channelId, List<String> itemIds) {
+      mChannelId = channelId;
+      mUserId = null;
+      mChannel = null;
+      mItemIds = itemIds;
+    }
+    /**
      * Constructor to get published items from a channel by item ID's.
      * @param userId User ID of a user channel or null for global channel.
      * @param channel A path like channel name.
      * @param itemIds Published item ID's.
+     * @deprecated Use {@link #ItemsByIdsRequest(String, List)}
      */
+    @Deprecated
     public ItemsByIdsRequest(String userId, String channel, List<String> itemIds) {
+      mChannelId = null;
       mUserId = userId;
       mChannel = channel;
       mItemIds = itemIds;
+    }
+
+    public String getChannelId() {
+      return mChannelId;
     }
 
     public String getUserId() {
@@ -589,8 +673,10 @@ public class ChannelAction {
    * @hide
    */
   public static class SubscribeRequest extends JSONifiable {
+    @SerializedName("channelId")
+    private final String mChannelId;
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("channelName")
     private final String mChannel;
     @SerializedName("devId")
@@ -599,25 +685,34 @@ public class ChannelAction {
     private boolean mErrorOnDup;
 
     /**
-     * Subscription request for a global channel.
-     * @param channel The channel name.
+     * Subscription request to a channel.
+     * @param channelId The channel ID.
      * @param devId A device ID for this subscription or null for all devices.
      */
-    public SubscribeRequest(String channel, String devId) {
-      mChannel = channel;
+    public SubscribeRequest(String channelId, String devId) {
+      mChannelId = channelId;
+      mUserId = null;
+      mChannel = null;
       mDevId = devId;
     }
 
     /**
-     * Subscription request for a personal channel.
-     * @param userId The user ID of a personal channel.
-     * @param channel The channel name.
+     * Subscription request using a public or personal channel name.
+     * @param userId The user ID of a personal channel, or null for public channel
+     * @param channel The fully qualified channel name.
      * @param devId A device ID for this subscription or null for all devices.
+     * @deprecated Use {@link #SubscribeRequest(String, String)}
      */
+    @Deprecated
     public SubscribeRequest(String userId, String channel, String devId) {
+      mChannelId = null;
       mUserId = userId;
       mChannel = channel;
       mDevId = devId;
+    }
+
+    public String getChannelId() {
+      return mChannelId;
     }
 
     /**
@@ -724,33 +819,44 @@ public class ChannelAction {
    * @hide
    */
   public static class UnsubscribeRequest extends JSONifiable {
+    @SerializedName("channelId")
+    private final String mChannelId;
     @SerializedName("userId")
-    private String mUserId;
+    private final String mUserId;
     @SerializedName("channelName")
     private final String mChannel;
     @SerializedName("subscriptionId")
     private final String mSubId;
 
     /**
-     * Constructor for unsubscribing a global channel.
-     * @param channel The channel name.
+     * Constructor for unsubscribing a channel by channel ID.
+     * @param channelId The channel ID.
      * @param subId A subscription ID or null for all subscriptions to the channel.
      */
-    public UnsubscribeRequest(String channel, String subId) {
-      mChannel = channel;
+    public UnsubscribeRequest(String channelId, String subId) {
+      mChannelId = channelId;
+      mUserId = null;
+      mChannel = null;
       mSubId = subId;
     }
 
     /**
-     * Constructor for unsubscribing a personal channel.
-     * @param userId The user ID of a personal channel.
+     * Constructor for unsubscribing a channel.
+     * @param userId The user ID of a personal channel, or null for public channel.
      * @param channel The channel name.
      * @param subId A subscription ID or null for all subscriptions to the channel.
+     * @deprecated Use {@link #UnsubscribeRequest(String, String)}
      */
+    @Deprecated
     public UnsubscribeRequest(String userId, String channel, String subId) {
+      mChannelId = null;
       mUserId = userId;
       mChannel = channel;
       mSubId = subId;
+    }
+
+    public String getChannelId() {
+      return mChannelId;
     }
 
     /**
@@ -1029,35 +1135,35 @@ public class ChannelAction {
     }
   }
 
-  /**
-   * @hide
-   * ChannelInfo with subscription count.
-   */
-  public static class ChannelInfoWithSubscriptionCount extends ChannelInfo {
-    private int subscriptionCount;
-    /**
-     * @hide
-     * @param userId
-     * @param channel
-     * @param isCollection
-     */
-    public ChannelInfoWithSubscriptionCount(String userId, String channel, boolean isCollection) {
-      super(userId, channel, isCollection);
-    }
-
-    /**
-     * Get the subscription count.
-     * @return
-     */
-    public int getSubscriptionCount() {
-      return subscriptionCount;
-    }
-
-    public ChannelInfoWithSubscriptionCount setSubscriptionCount(int subscriptionCount) {
-      this.subscriptionCount = subscriptionCount;
-      return this;
-    }
-  }
+//  /**
+//   * @hide
+//   * ChannelInfo with subscription count.
+//   */
+//  public static class ChannelInfoWithSubscriptionCount extends ChannelInfo {
+//    private int subscriptionCount;
+//    /**
+//     * @hide
+//     * @param userId
+//     * @param channel
+//     * @param isCollection
+//     */
+//    public ChannelInfoWithSubscriptionCount(String userId, String channel, boolean isCollection) {
+//      super(userId, channel, isCollection);
+//    }
+//
+//    /**
+//     * Get the subscription count.
+//     * @return
+//     */
+//    public int getSubscriptionCount() {
+//      return subscriptionCount;
+//    }
+//
+//    public ChannelInfoWithSubscriptionCount setSubscriptionCount(int subscriptionCount) {
+//      this.subscriptionCount = subscriptionCount;
+//      return this;
+//    }
+//  }
 
   /**
    * Response of the channel search.
@@ -1236,6 +1342,8 @@ public class ChannelAction {
    * Request payload for fetching published items from a channel.
    */
   public static class FetchRequest extends JSONifiable {
+    @SerializedName("channelId")
+    private final String mChannelId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("channelName")
@@ -1243,10 +1351,31 @@ public class ChannelAction {
     @SerializedName("options")
     private final FetchOptions mOptions;
 
+    /**
+     * Constructor for fetching items from a channel by channel ID.
+     * @param channelId
+     * @param options
+     */
+    public FetchRequest(String channelId, FetchOptions options) {
+      mChannelId = channelId;
+      mUserId = null;
+      mChannel = null;
+      mOptions = options;
+    }
+
+    /**
+     * @deprecated Use {@link #FetchRequest(String, FetchOptions)}
+     */
+    @Deprecated
     public FetchRequest(String userId, String channel, FetchOptions options) {
+      mChannelId = null;
       mUserId = userId;
       mChannel = channel;
       mOptions = options;
+    }
+
+    public String getChannelId() {
+      return mChannelId;
     }
 
     public String getUserId() {
@@ -1309,10 +1438,10 @@ public class ChannelAction {
    * Response payload for fetching published items.
    */
   public static class FetchResponse extends JSONifiable {
-    @SerializedName("userId")
-    private final String mUserId;
-    @SerializedName("channelName")
-    private final String mChannel;
+    @SerializedName("channelId")
+    private final String mChannelId;
+    @SerializedName("displayName")
+    private final String mDisplayName;
     @SerializedName("totalCount")
     private final int mTotal;
     @SerializedName("items")
@@ -1320,24 +1449,25 @@ public class ChannelAction {
 
     /**
      * @hide
-     * @param userId
-     * @param channel
+     * @param channelId
+     * @param displayName
+     * @param total
      * @param items
      */
-    public FetchResponse(String userId, String channel, int total,
+    public FetchResponse(String channelId, String displayName, int total,
         List<MMXPublishedItem> items) {
-      mUserId = userId;
-      mChannel = channel;
+      mChannelId = channelId;
+      mDisplayName = displayName;
       mTotal = total;
       mItems = items;
     }
 
-    public String getUserId() {
-      return mUserId;
+    public String getChannelId() {
+      return mChannelId;
     }
 
-    public String getChannel() {
-      return mChannel;
+    public String getDisplayName() {
+      return mDisplayName;
     }
 
     public List<MMXPublishedItem> getItems() {
@@ -1358,6 +1488,8 @@ public class ChannelAction {
    * Request to get all subscribers from a channel.
    */
   public static class SubscribersRequest extends JSONifiable {
+    @SerializedName("channelId")
+    private final String mChannelId;
     @SerializedName("userId")
     private final String mUserId;
     @SerializedName("channelName")
@@ -1369,26 +1501,67 @@ public class ChannelAction {
 
     /**
      *
-     * @param userId Null for global channel, user ID for the user channel.
-     * @param channel The channel name.
+     * @param channelId A channel ID.
      * @param limit -1 for unlimited, or > 0.
      */
-    public SubscribersRequest(String userId, String channel, int limit) {
-      this(userId, channel, 0, limit);
+    public SubscribersRequest(String channelId, int limit) {
+      this(channelId, null, null, 0, limit);
+    }
+
+    /**
+     *
+     * @param channelId A channel ID
+     * @param offset
+     * @param limit -1 for unlimited, or > 0.
+     */
+    public SubscribersRequest(String channelId, int offset, int limit) {
+      this(channelId, null, null, offset, limit);
     }
 
     /**
      *
      * @param userId Null for global channel, user ID for the user channel.
-     * @param channel The channel name.
+     * @param channel The channel fully qualified name.
+     * @param limit -1 for unlimited, or > 0.
+     * @deprecated Use {@link #SubscribersRequest(String, int)}
+     */
+    @Deprecated
+    public SubscribersRequest(String userId, String channel, int limit) {
+      this(null, userId, channel, 0, limit);
+    }
+
+    /**
+     *
+     * @param userId Null for global channel, user ID for the user channel.
+     * @param channel The channel fully qualified name.
      * @param offset
      * @param limit -1 for unlimited, or > 0.
+     * @deprecated Use {@link #SubscribersRequest(String, int, int)}
      */
+    @Deprecated
     public SubscribersRequest(String userId, String channel, int offset, int limit) {
+      this(null, userId, channel, offset, limit);
+    }
+
+    /**
+     * Constructor with either channel ID or channel fully qualified name.
+     * @param channelId A channel ID.
+     * @param userId
+     * @param channel
+     * @param offset
+     * @param limit
+     */
+    protected SubscribersRequest(String channelId, String userId, String channel,
+                              int offset, int limit) {
+      mChannelId = channelId;
       mUserId = userId;
       mChannel = channel;
-      this.mOffset = offset;
+      mOffset = offset;
       mLimit = limit;
+    }
+
+    public String getChannelId() {
+      return mChannelId;
     }
 
     public String getUserId() {

@@ -280,7 +280,7 @@ public class MMXChannelId implements MMXChannel {
   /**
    * Get the channel ID.  The channel ID can be used in the URL path.  Currently
    * the ID is derived from the name.  TODO: decouple the ID from the channel name.
-   * @return The ID in the form of "[userID#]channelID".
+   * @return The ID in the form of "userID#ID" or "ID".
    */
   @Override
   public String getId() {
@@ -294,7 +294,7 @@ public class MMXChannelId implements MMXChannel {
    * @see #toString()
    */
   public static MMXChannelId parse(String channelId) {
-    return new MMXChannelId(channelId);
+    return new MMXChannelId(channelId, null, null, null);
   }
 
   /**

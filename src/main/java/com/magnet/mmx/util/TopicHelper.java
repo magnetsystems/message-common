@@ -80,8 +80,7 @@ public class TopicHelper {
 
   /**
    * @hide
-   * Assuming that <code>topicId</code> is in the form of "/appId/*" or
-   * "/appId/userId", check if it is a user topic.
+   * Check if the <code>nodeId</code> is for a user topic.
    * @param nodeId
    * @return
    */
@@ -104,28 +103,6 @@ public class TopicHelper {
       return ((nodeId.charAt(0) == TOPIC_DELIM) &&
                nodeId.startsWith(appId, 1) &&
                (nodeId.charAt(1+appId.length()) == TOPIC_DELIM));
-    } catch (IndexOutOfBoundsException e) {
-      return false;
-    }
-  }
-
-  /**
-   * Check if the topic represented by the nodeId is a user topic
-   * @param nodeId A non-null full topic path
-   * @param appId A non-null app ID
-   * @return true if it represents a user topic false other wise.
-   */
-  public static boolean isUserTopic(String nodeId, String appId) {
-    String prefix = new StringBuilder().append(TOPIC_DELIM).append(appId)
-                      .append(TOPIC_DELIM).append(TOPIC_FOR_APP)
-                      .append(TOPIC_DELIM).toString();
-    try {
-      int index = nodeId.indexOf(prefix);
-      if (index == -1) {
-        return true;
-      } else {
-        return false;
-      }
     } catch (IndexOutOfBoundsException e) {
       return false;
     }
@@ -453,24 +430,24 @@ public class TopicHelper {
   }
 
   /**
-   * Construct the pubsub node ID for the root global topics.  The node ID will
-   * be "/appID/&asterisk;".
+   * Construct the pubsub node ID for the top global topics.  The node ID will
+   * be "appID/&asterisk;".
    * @param appId The app ID.
-   * @return A pubsub node ID of the root global topic.
+   * @return A pubsub node ID of the top global topic.
    */
   public static String toGlobalNodeId(String appId) {
-    return TOPIC_DELIM + appId + TOPIC_DELIM + TOPIC_FOR_APP;
+    return appId + TOPIC_DELIM + TOPIC_FOR_APP;
   }
 
   /**
-   * Construct the pubsub node ID for the root user topic.  The node ID will be
-   * "/appID/userID".
+   * Construct the pubsub node ID for the top user topic.  The node ID will be
+   * "appID/userID".
    * @param appId The app ID.
    * @param userId A user ID for user topics.
-   * @return A pubsub node ID of the root user topic.
+   * @return A pubsub node ID of the top user topic.
    */
   public static String toUserNodeId(String appId, String userId) {
-    return TOPIC_DELIM + appId + TOPIC_DELIM + userId;
+    return appId + TOPIC_DELIM + userId;
   }
 
   /**
@@ -528,7 +505,7 @@ public class TopicHelper {
 
   /**
    * Check if the <code>nodeId</code> is the app root node ID (appID),
-   * global root node ID (/appID/*) or user root node ID (/appID/userID.)
+   * global root node ID (appID/*) or user root node ID (appID/userID.)
    * @return true if it is one of the top node ID's; otherwise, false.
    */
   public static boolean isTopNodeId(String nodeId) {

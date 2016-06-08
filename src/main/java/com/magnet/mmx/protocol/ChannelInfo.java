@@ -49,16 +49,34 @@ public class ChannelInfo extends MMXChannelId implements MMXChannel {
   private boolean mPushMutedByUser;
   @SerializedName("pushMutedUntil")
   private Date mPushMutedUntil;
+
   /**
-   * @hide
-   * @param id The channel unique ID.
-   * @param displayName A channel display name.
+   * Constructor using id/displayName and/or userId/channel.
+   * @param id A unique channel ID.
+   * @param displayName Channel display name.
+   * @param userId Owner ID for private channel, or null for public channel.
+   * @param channel Fully qualified channel name.
    * @param isCollection
    */
-  public ChannelInfo(String id, String displayName, boolean isCollection) {
-    super(id, displayName);
+  public ChannelInfo(String id, String displayName, String userId, String channel,
+                     boolean isCollection) {
+    super(id, displayName, userId, channel);
     mCollection = isCollection;
   }
+
+  /**
+   * This is for backward compatibility.
+   * @param userId Owner ID for private channel, null for public channel.
+   * @param channel A channel fully qualified name.
+   * @param isCollection
+   * @deprecated Use {@link #ChannelInfo(String, String, String, String, boolean)}
+   */
+  @Deprecated
+  public ChannelInfo(String userId, String channel, boolean isCollection) {
+    super(null, null, userId, channel);
+    mCollection = isCollection;
+  }
+
 
   /**
    * Check if this channel is a collection (i.e. for subscription only.)

@@ -17,15 +17,11 @@ package com.magnet.mmx.util;
 
 import com.magnet.mmx.protocol.*;
 
-import java.util.regex.Pattern;
-
 /**
  * @hide
- * A helper class for channels in PubSub.  There are two formats for user channel:
- * userID/channelName (internal node path) and useID#channelName (used in a path for
- * REST API.)  Use ChannelResource.nameToId() or ChannelResource.idToName() to
- * encode/decode userID#channelName; otherwise, use {@link #parseNode(String)}
- * or {@link #makeNodeId(String, String, String)} to encode/decode userID/channelName.
+ * A helper class for channels in PubSub.  Each user channel has a unique
+ * channel ID in the form of userID#ID.  There are various conversion methods
+ * between pubsub node ID and channel ID.
  */
 public class ChannelHelper {
   public final static char CHANNEL_DELIM = TopicHelper.TOPIC_DELIM;
@@ -62,11 +58,9 @@ public class ChannelHelper {
     return TopicHelper.generateDeviceAllLeafTopicName(osType);
   }
 
-
   /**
    * @hide
-   * Assuming that <code>nodeId</code> is in the form of "/appId/*" or
-   * "/appId/userId", check if it is a user channel.
+   * Check if a <code>nodeId</code> is for a private channel.
    * @param nodeId
    * @return
    */
@@ -85,16 +79,6 @@ public class ChannelHelper {
   }
 
   /**
-   * Check if the channel identified by the node ID is a user channel
-   * @param nodeId A node ID.
-   * @param appId A non-null app ID
-   * @return true if it represents a user channel; otherwise, false.
-   */
-  public static boolean isUserChannel(String nodeId, String appId) {
-    return TopicHelper.isUserTopic(nodeId, appId);
-  }
-
-  /**
    * Construct an application prefix for the channel.
    * @param appId
    * @return The prefix as "/appId/"
@@ -107,26 +91,59 @@ public class ChannelHelper {
    * Parse an XMPP nodeID into a AppChannel object.  There are two formats:
    * /appID/&asterisk;/ID for public channel and /appID/userID/ID for private
    * channel.
-   * @param channel A XMPP PubSub nodeID string.
+   * @param nodeId A XMPP PubSub nodeID string.
    * @return An AppChannel object, or null if not an MMX channel.
    */
-  public static AppChannel toAppChannel(String channel) {
-    if (channel.charAt(0) != CHANNEL_DELIM) {
+  public static AppChannel toAppChannel(String nodeId) {
+    if (nodeId.charAt(0) != CHANNEL_DELIM) {
       return null;
     }
-    int index1 = channel.indexOf(CHANNEL_DELIM, 1);
+    int index1 = nodeId.indexOf(CHANNEL_DELIM, 1);
     if (index1 < 0) {
       return null;
     }
-    int index2 = channel.indexOf(CHANNEL_DELIM, index1+1);
+    int index2 = nodeId.indexOf(CHANNEL_DELIM, index1+1);
     if (index2 < 0) {
       return null;
     }
-    String appId = channel.substring(1, index1);
-    String userId = channel.substring(index1+1, index2);
-    String id = channel.substring(index2+1);
+    String appId = nodeId.substring(1, index1);
+    String userId = nodeId.substring(index1+1, index2);
+    String channelName = nodeId.substring(index2+1);
     return new AppChannel(appId, (userId.charAt(0) == CHANNEL_FOR_APP) ?
-                      null : userId, id);
+                      null : userId, channelName);
+  }
+
+  /**
+   * @deprecated Use #toAppChannel(String)
+   */
+  @Deprecated
+  public static AppChannel parseChannel(String nodeId) {
+    return toAppChannel(nodeId);
+  }
+
+  /**
+   * Parse an XMPP nodeID into a Channel ID object.  There are two formats:
+   * /appID/&asterisk;/channel for global channel and /appID/userID/channel for
+   * personal channel.
+   * @param nodeId A XMPP PubSub nodeID string.
+   * @return A MMXChannelId, or null if not an MMX channel.
+   */
+  public static MMXChannelId parseNode(String nodeId) {
+    if (nodeId.charAt(0) != CHANNEL_DELIM) {
+      return null;
+    }
+    int index1 = nodeId.indexOf(CHANNEL_DELIM, 1);
+    if (index1 < 0) {
+      return null;
+    }
+    int index2 = nodeId.indexOf(CHANNEL_DELIM, index1+1);
+    if (index2 < 0) {
+      return null;
+    }
+    String userId = nodeId.substring(index1+1, index2);
+    String channelName = nodeId.substring(index2+1);
+    return new MMXChannelId((userId.charAt(0) == CHANNEL_FOR_APP) ?
+        null : userId, channelName);
   }
 
   /**
@@ -221,18 +238,6 @@ public class ChannelHelper {
    */
   public static boolean validateApplicationChannelName (String name) {
     return TopicHelper.validateApplicationTopicName(name);
-  }
-
-  /**
-   * The hack to fix MOB-2516 that allows the console to display user channels
-   * as userID#channelName. This method parses the global channel or user
-   * channel properly.
-   * TODO: once the name and ID are decoupled, this method can be deprecated.
-   * @param channelId The form of "channelID" or "userID#channelID".
-   * @return
-   */
-  public static MMXChannelId nameToId(String channelId) {
-    return MMXChannelId.fromId(channelId);
   }
 
   /**
@@ -338,7 +343,7 @@ public class ChannelHelper {
 
   /**
    * Check if the <code>nodeId</code> is the app root node ID (appID),
-   * global root node ID (/appID/*), or user root node ID (/appID/userID.)
+   * global root node ID (appID/*), or user root node ID (appID/userID.)
    * @return true if it is the top node ID; otherwise, false.
    */
   public static boolean isTopNodeId(String nodeId) {
